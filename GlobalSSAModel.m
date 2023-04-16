@@ -27,8 +27,8 @@ classdef GlobalSSAModel
         
         
         function obj = add_nation(obj, nation_agent)
-            % Adds an nation agent object
-            
+            % Adds a nation agent object
+            obj.nations{end+1} = nation_agent;
         end
     
         function obj = timestep(obj,t)
