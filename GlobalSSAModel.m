@@ -4,8 +4,8 @@ classdef GlobalSSAModel
         leo_environment
         nations
         n_nations
-        n_members % may be better suited as a GSSN object property
-        n_nonmembers % may be better suited as a GSSN object property
+        n_members
+        n_nonmembers
         gssn 
     end
     
@@ -26,14 +26,16 @@ classdef GlobalSSAModel
         end
         
         
-        function obj = add(obj, object)
-            % Adds an object
-            obj = obj.add(object);
+        function obj = add_nation(obj, nation_agent)
+            % Adds an nation agent object
+            
         end
     
-        function obj = step(obj,t)
-            % command the model to advance a time step
-            obj = obj.step(t);
+        function obj = timestep(obj,t)
+            % commands the model to advance a time step
+            
+            % execute environment object, nation agent, and GSSN object updates
+            
         end
     end
 end

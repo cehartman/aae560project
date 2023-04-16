@@ -26,5 +26,5 @@ while t < sim_end_time
     % increment time
     t = t+8; % 8 day time steps
     % perform the next model step
-    gssa_model = gssa_model.step(t);
+    gssa_model = gssa_model.timestep(t);
 end
