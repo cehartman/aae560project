@@ -14,8 +14,9 @@ clear; close all; clc; rng('default');
 gssa_model = GlobalSSAModel();
 
 % Initialize Adjustable Parameters
+sim_end_time = 100*365; % 100 years in days 
 
-% Add Objects/Agents
+% Add nation agents
 
 % Initialize storage arrays
 
@@ -23,7 +24,7 @@ gssa_model = GlobalSSAModel();
 t = 0;
 while t < sim_end_time
     % increment time
-    t = t+1;
+    t = t+8; % 8 day time steps
     % perform the next model step
     gssa_model = gssa_model.step(t);
 end
