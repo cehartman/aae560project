@@ -1,6 +1,8 @@
 classdef GlobalSSAModel
     
     properties
+
+        %time
     
     end
     
