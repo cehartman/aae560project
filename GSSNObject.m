@@ -2,19 +2,18 @@
 %this class is the GSSN
 
 classdef GSSNObject
-    
+
     properties
 
         num_nations
         num_objects
-        nations
         data_quality
         
 
     end
 
     methods
-        function obj = GSSNObject()
+        function obj = initialize(obj)
             obj.num_nations = 0;
             obj.num_objects = 0;
             obj.data_quality = 0;
