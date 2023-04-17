@@ -53,10 +53,10 @@ classdef NationAgent
             % should joining/leaving GSSN take more than one timestep?
         end
         
-        function obj = fuzzing_decision(obj)
-            % nation decides whether or not to fuzz their data 
-            
-        end
+%         function obj = fuzzing_decision(obj)
+%             % nation decides whether or not to fuzz their data 
+%             
+%         end
         
         function obj = update_economic_conditions(obj)
             % "The SoS model also needs to support the injection of events 

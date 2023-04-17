@@ -34,7 +34,7 @@ classdef GlobalSSAModel
         function obj = timestep(obj,t)
             % commands the model to advance a time step
             
-            % execute environment object, nation agent, and GSSN object updates
+            % execute environment object, nation agents, and GSSN object updates
             
         end
     end
