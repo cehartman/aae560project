@@ -15,7 +15,7 @@ classdef SSNClassVV < SSNClass
         function obj = Run(obj,timeEnd,timeStep)
             % Initialize Parameters / Data Structures
             obj = obj.InitializeParams(timeEnd,timeStep);
-            obj = obj.AddNation(0,0,0,100); % Retire time ste to 100 years (i.e., never retire)
+            obj = obj.AddNation(0,0,0,100); % Retire time set to 100 years (i.e., never retire)
             obj = obj.InitializeData;
             % Add annual launch rate to more closely match DELTA 2.0
             launchEvents = floor(normrnd(70.5/365.2425*obj.params.timeStep,0.5,size(obj.params.timeVec)));
@@ -39,10 +39,6 @@ classdef SSNClassVV < SSNClass
                 tempDebris = 0;
                 numLostSat = 0;
                 for ss = 1:obj.nationAgent.info.currentSat
-%                     % Generate Random Probability of Collision
-%                     r = rand;
-%                     % If Collision Occurs
-%                     if r < obj.env.Ppc
                     if collisionOccurred(ss)
                         obj.data.totalCollisions(tt) = obj.data.totalCollisions(tt) + 1;
                         tempDebris = tempDebris + obj.params.numCollisionDebris;

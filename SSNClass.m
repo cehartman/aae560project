@@ -24,8 +24,7 @@ classdef SSNClass
             obj = obj.AddNation(10,500,160,8);
             obj = obj.InitializeData;
             
-            launchEvents = floor(normrnd(70.5/365.2425*obj.params.timeStep,0.5,size(obj.params.timeVec)));
-            launchEvents(launchEvents < 0) = 0;
+            launchEvents = zeros(size(obj.params.timeVec));
             retireIdxShift = find(obj.params.timeVec <= obj.nationAgent.info.orbitPeriod*365.2425,1,'last');
             retireEvents = circshift(launchEvents,retireIdxShift);
             retireEvents(1:retireIdxShift) = 0;
@@ -112,32 +111,12 @@ classdef SSNClass
         %------------------------------------------------------------------
         % Compute Probability of Collision
         %------------------------------------------------------------------
-% %         function obj = ComputeCollisionProb(obj)
-%         function collisionOccurred = DetermineCollision(obj)
-%             % Compute Mean Number of Collisions
-%             c = obj.env.SPD*obj.params.Asat*obj.params.vRel*obj.params.timeStep*86400;
-% %             % Compute Probability of 1 or More Collisions
-% %             obj.env.Ppc = 1 - exp(-c);
-%             
-% %             epsilon = 1e-20;
-% %             j = 0:obj.env.numDebris;
-% %             Pj = poisspdf(j,c);
-% %             kIdx = find(Pj<=epsilon,1,'first')-1;
-% %             Pj_hat = Pj ./ sum(Pj(1:kIdx));
-% %             r = rand;
-% %             nPossibleCollisions = find(cumsum(Pj_hat)>r,1,'first')-1;
-%             nPossibleCollisions = poissrnd(c);
-%             if nPossibleCollisions > obj.nationAgent.info.currentGBS * obj.nationAgent.info.trackCap
-%                 collisionOccurred = true;
-%             else
-%                 collisionOccurred = false;
-%             end
-%         end
         function collisionOccurred = DetermineCollision(obj)
             % Compute Mean Number of Collisions
             c = obj.env.SPD*obj.params.Asat*obj.params.vRel*obj.params.timeStep*86400;
             numPossibleCollisions = poissrnd(c,obj.nationAgent.info.currentSat,1);
-            collisionOccurred = numPossibleCollisions > obj.nationAgent.info.currentGBS * obj.nationAgent.info.trackCap;
+            collisionOccurred = numPossibleCollisions > obj.nationAgent.info.currentGBS * obj.nationAgent.info.trackCap;% ...
+                %| rand(1,obj.nationAgent.info.currentSat) > 0.99.^numPossibleCollisions;
         end
         
         %------------------------------------------------------------------

@@ -41,14 +41,22 @@ classdef NationAgent
         function obj = assess_sensor_population(obj)
             % nation compares tracking capacity against its current sensor
             % population to determine whether a new sensor should be added
+
+            %if total tracking capacity < 120% of number of objects, add
+            %sensor
         end
         
         function obj = add_sensor(obj)
             % nation starts or continues to build a new sensor
+
+            %for each time step, increment counter until SCS is met, then
+            %add the sensor to the nations capability
         end
         
         function obj = assess_gssn_membership(obj)
             % nations decides whether to join, leave, or stay in the GSSN
+
+            
             
             % should joining/leaving GSSN take more than one timestep?
         end

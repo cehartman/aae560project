@@ -64,6 +64,14 @@ classdef GSSNObject
         end
 
 
+        function obj = inorout(obj, all_nations)
+            
+            %
+            members = find(all_nations.id == obj.nations);
+
+
+
+        end
 
         function obj = timestep(obj)
             
