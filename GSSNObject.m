@@ -1,7 +1,7 @@
 
 %this class is the GSSN
 
-classdef gssaAgent
+classdef gssaObject
 
     properties
 
