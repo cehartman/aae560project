@@ -9,16 +9,19 @@ classdef GSSNObject
         num_objects
         nations
         data_quality
+        fee
+        decision
         
 
     end
 
     methods
-        function obj = GSSNObject()
+        function obj = GSSNObject(cost)
             obj.num_nations = 0;
             obj.num_objects = 0;
             obj.data_quality = 0;
             obj.nations = {};
+            obj.fee = cost;
 
         end
 
@@ -64,12 +67,22 @@ classdef GSSNObject
         end
 
 
-        function obj = inorout(obj, all_nations)
+        function obj = inorout(obj,agent)
             
-            %
-            members = find(all_nations.id == obj.nations);
+            %this function makes a decision if the nation in question
+            %should be accepted or rejected from the gssn
+
+            %look at the dataquality of the member, and compare to the data
+            %quality of the gssn
 
 
+        end
+        
+        function obj = update_dataquality(obj,members)
+
+              %TODO:Update data quality based on all the members in the GSSN  
+
+            
 
         end
 
