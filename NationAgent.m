@@ -11,18 +11,19 @@ classdef NationAgent
         gssn_member % bool
         fuzzing % bool
         economic_conditions
-        data_quality
+        data_quality %array of sensor data qualities
         revenue
         total_cost
         need_sensor %bool
         wait
-        gssn_desire %bool
+        want_gssn %bool
+        budget
      
     end
     
     methods
         
-        function obj = NationAgent(id,sensors,sc,scs,smc,soc,dq,gm,fuzz)
+        function obj = NationAgent(id,sensors,sc,scs,smc,soc,dq,gm,fuzz, gdp)
             obj.id = id;
             obj.n_sensors = sensors;
             obj.sensor_capability = sc;
@@ -37,33 +38,63 @@ classdef NationAgent
             obj.total_cost = 0; % from sensor construction, sensor operation, satellite collisions
             obj.need_sensor = 0; %binary 0 = does not need sensor, 1 = need sensor
             obj.wait = 0;
-            obj.gssn_desire = 0;
+            obj.want_gssn = 0;
+            obj.budget = gdp;
+            
           
 
         end
         
-        function obj = update(obj)
-            % execute nation decisions for current time step
-            
-            %decide to join GSSA or not
+        function obj = update(obj, total_objects, gssn_objects, fee)
 
-            %decide whether or not to build a new sensor
+            %does agent want a sensor?
+            obj = sensor_desire(obj,total_objects,gssn_objects);
+
+            %does agent want to be part of the gssn? Only update if the
+            %obj.wait = 0 (not in the middle of adding a sensor)
+
+            if obj.wait == 0
+                obj = gssn_desire(obj,fee);
+            end
+
+            %if the agent does not want to be part of the gssn but does 
+            % want to add a sensor, and can afford it, 
+            % add (or continue adding) the sensor
+
+            %if a nation cannot afford it, it will have to wait until the
+            %next timestep it can afford it to continue manufacturing it
+            
+            if obj.want_gssn == 0 && obj.need_sensor == 1 && obj.budget >= obj.sensor_manu_cost
+                obj.add_sensor(obj);
+            end
 
         end
         
-        function obj = assess_sensor_population(obj, total_objects)
+        function obj = sensor_desire(obj, total_objects, gssn_objects)
 
             %this method requires input of the total number of objects in
             %the environment and updates the desire of the agent to build a
             %sensor or not
+            
 
-            obj.tracking_capacity = sensors*sc;
-            if obj.tracking_capacity < 1.2 * total_objects
+            %if the agent is part of the gssn, total tracking capability of
+            %the agent is the number of gssn objects being tracked
+            
+            if obj.gssn_member == 1
+                total_tracked = gssn_objects;
+            else
+                total_tracked = obj.tracking_capacity;
+            end
+
+
+            if total_tracked < 1.2 * total_objects
                 obj.need_sensor = 1;
             else
                 obj.need_sensor = 0;
             end
 
+
+            %the agent has now expressed a desire for a new sensor or not
         end
         
         function obj = add_sensor(obj)
@@ -80,22 +111,19 @@ classdef NationAgent
             elseif obj.wait >= obj.sensor_con_speed
                 obj.total_cost = obj.total_cost + obj.sensor_manu_cost;
                 obj.n_sensors = obj.n_sensors + 1;
+                
+                %add sensor with a random data quality
+                obj.data_quality(end+1) = randi([1 3]);
+
+                obj.wait = 0;
 
             end
 
-
-            %for each time step, increment counter until SCS is met, then
-            %add the sensor to the nations capability
         end
         
-        function obj = assess_gssn_membership(obj, total_objects, gssn)
+        function obj = gssn_desire(obj, fee)
             % nations decides whether to join, leave, or stay in the GSSN
 
-            %First thing the nation looks at is if its tracking needs are
-            %met
-            
-            obj.assess_sensor_population(obj,total_objects)
-            
             %if an agent doesn't need a sensor, nothing will change here
             %if its current needs are not met, and the agent is not in the
             %gssn already, figure out how much adding a sensor would cost
@@ -105,46 +133,29 @@ classdef NationAgent
 
                 %simple check, could add complexity here
  %%%%%%%%%%MANUFACTURING COST OR OPERATION COST?%%%%%%%%%%%%%%%%%%
-                if obj.sensor_manu_cost < gssn.fee
-                    obj.gssn_desire = 0;
-                elseif obj.sensor_manu_cost >= gssn.fee
-                    obj.gssn_desire = 1;
 
-                end
-            
-                %TODO(?): could add another decision tree on whether or not the
-                %agent wants to leave the gssn
+                %if it's cheaper to mfg a sensor vs joining gssn, nation
+                %will choose to make its own
+                if obj.sensor_manu_cost < fee
+                    obj.want_gssn= 0;
 
-                %now that the agent has expressed a desire to join the
-                %GSSN, we will assess if the GSSN will let the agent join
-
-                gssn.inorout(obj);
-
-                %if the agent wants in, and the gssn will let them in,
-                %admit
-
-                if gssn.decision == 1 && obj.gssn_desire == 1
-
-                    %add member to GSSN
-                    obj.gssn_member = 1;
-                    %add gssn object tracking capability to nation tracking
-                    %capability
                 
-
-                %if the nation wants in, but the gssn won't let them in,
-                %then the nation needs to build a sensor
-                elseif gssn.decision == 0 && obj.gssn_desire == 1
-
-                    obj.gssn_member = 0;
-                    obj.add_sensor(obj);
+                elseif obj.sensor_manu_cost >= gssn.fee
+                    obj.want_gssn = 1;
 
                 end
 
+                %the agent has now updated its desire of if it wants to be
+                %part of the GSSN or not based on cost alone. Note this
+                %does not change anything if the agent is already part of
+                %the gssn
 
+                %TODO: Add economics logic
+            end
 
         end
         
-%       function obj = fuzzing_decision(obj)
+%        function obj = fuzzing_decision(obj)
 %             % nation decides whether or not to fuzz their data 
 %             
 %         end
@@ -155,6 +166,15 @@ classdef NationAgent
             % each nation is operating at that time, which affects 
             % variables like sensor manufacturing and operating costs and 
             % sensor addition timeline."
+            
+
+            %simulates random fluctuations in the nations budget
+            %take the budget, and add or subtract a percentage of the
+            %budget based on standard normal distribution
+
+            obj.budget = obj.budget + obj.budget * rand()/100;
+
+
         end
         
         function obj = update_costs_and_revenue(obj)

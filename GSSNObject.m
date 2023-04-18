@@ -20,25 +20,25 @@ classdef GSSNObject
             obj.num_nations = 0;
             obj.num_objects = 0;
             obj.data_quality = 0;
-            obj.nations = {};
-            obj.fee = cost;
+            obj.nations = {}; 
 
         end
 
         %adds a nation to the GSSN
-        function obj = add_nation(obj,nation_name)
+        function obj = add_nation(obj,nation_name,objects_tracking)
             %increment 
             obj.num_nations = obj.num_nations + 1;
 
             %add nation to the end of the list
             obj.nations(end+1) = {nation_name};
 
-            %Add additional object tracking capability
+            obj.num_objects = obj.num_objects + objects_tracking;
+
             %Increment data quality
 
         end
 
-        function obj = remove_nation(obj,nation_name)
+        function obj = remove_nation(obj,nation_name, objects_tracking)
 
             %search the list and return the index of the nation
             ind = 0;
@@ -60,8 +60,8 @@ classdef GSSNObject
             obj.num_nations = obj.num_nations - 1;
 
             
-            %NOTES
-            %remove object tracking capability
+           
+            obj.num_objects = obj.num_objects - objects_tracking;
             %update data quality
 
         end
@@ -71,10 +71,7 @@ classdef GSSNObject
             
             %this function makes a decision if the nation in question
             %should be accepted or rejected from the gssn
-
-            %look at the dataquality of the member, and compare to the data
-            %quality of the gssn
-
+            %Basically, can the nation afford to be in the GSSN or not
 
         end
         
