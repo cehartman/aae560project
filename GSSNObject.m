@@ -24,6 +24,16 @@ classdef GSSNObject
             obj.fee = cost;
 
         end
+        function obj = update(obj, agents)
+            obj.nations = agents;
+
+            sum = 0;
+            for i = 1:obj.num_nations
+                sum = sum + obj.nations{i}.tracking_capacity;
+            end
+
+            obj.num_objects = sum;
+        end
 
         %adds a nation to the GSSN
         function obj = add_nation(obj,nation)

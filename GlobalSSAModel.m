@@ -29,6 +29,8 @@ classdef GlobalSSAModel
         function obj = add_nation(obj, nation_agent)
             % Adds a nation agent object
             obj.nations{end+1} = nation_agent;
+            obj.n_nations = obj.n_nations + 1;
+            
         end
     
         function obj = add_gssn(obj,gssn_agent)
@@ -43,7 +45,30 @@ classdef GlobalSSAModel
             %STEP 1: Update Environment
             total_objects = 1000;
             %STEP 2: Update Nation Preferences
-            obj = obj.nations.update(total_objects,obj.gssn.num_objects, obj.gssn.fee);
+            
+            for i = 1:obj.n_nations
+                obj = obj.nations{i}.update(total_objects,...
+                    obj.gssn.num_objects, obj.gssn.fee);
+            end
+
+            %STEP 3: Update GSSN Properties
+
+            temp = {};
+            ct = 0;
+            for i = 1:obj.n_nations
+
+                if obj.nations{i}.gssn_member == 1
+                    ct = ct + 1;
+                    temp{ct} = members;
+                end
+            end
+
+            obj = obj.gssn.update(temp);
+
+            clear temp
+
+            %nation preferences have been updated, and GSSN have been
+            %updated
 
 
             %STEP 3: GSSN In or OUT
