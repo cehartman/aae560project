@@ -18,10 +18,10 @@ classdef GlobalSSAModel
             obj.n_nonmembers = 0;
             
             % initialize GSSN object
-            obj.gssn = GSSNObject();
+            %obj.gssn = GSSNObject();
             
             % initialize LEO satellite/debris model
-            obj.leo_environment = LEOModel(); %TODO: hook in Joe's debris model
+            %obj.leo_environment = LEOModel(); %TODO: hook in Joe's debris model
             
         end
         
@@ -31,8 +31,22 @@ classdef GlobalSSAModel
             obj.nations{end+1} = nation_agent;
         end
     
+        function obj = add_gssn(obj,gssn_agent)
+            obj.gssn = gssn_agent;
+        end
+
+
+
         function obj = timestep(obj,t)
             % commands the model to advance a time step
+
+            %STEP 1: Update Environment
+            total_objects = 1000;
+            %STEP 2: Update Nation Preferences
+            obj = obj.nations.update(total_objects,obj.gssn.num_objects, obj.gssn.fee);
+
+
+            %STEP 3: GSSN In or OUT
             
             % execute environment object, nation agents, and GSSN object updates
             

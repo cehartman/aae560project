@@ -16,34 +16,35 @@ classdef GSSNObject
     end
 
     methods
-        function obj = GSSNObject(cost)
-            obj.num_nations = 0;
-            obj.num_objects = 0;
-            obj.data_quality = 0;
-            obj.nations = {}; 
+        function obj = GSSNObject(nn, no, dq, na, cost)
+            obj.num_nations = nn;
+            obj.num_objects = no; %move this to an update 
+            obj.data_quality = dq;
+            obj.nations = na; 
+            obj.fee = cost;
 
         end
 
         %adds a nation to the GSSN
-        function obj = add_nation(obj,nation_name,objects_tracking)
+        function obj = add_nation(obj,nation)
             %increment 
             obj.num_nations = obj.num_nations + 1;
 
             %add nation to the end of the list
-            obj.nations(end+1) = {nation_name};
+            obj.nations{end+1} = nation;
 
-            obj.num_objects = obj.num_objects + objects_tracking;
+            obj.num_objects = obj.num_objects + nation.tracking_capacity;
 
-            %Increment data quality
+            %TODO: Increment data quality ?
 
         end
 
-        function obj = remove_nation(obj,nation_name, objects_tracking)
+        function obj = remove_nation(obj,nation)
 
             %search the list and return the index of the nation
             ind = 0;
             for i = 1:obj.num_nations
-                if obj.nations(i) == nation_name
+                if obj.nations{i}.id == nation.id
                     ind = i; %index of nation to be removed
                 end
             end
@@ -54,24 +55,29 @@ classdef GSSNObject
             end
 
             %delete the nation from the list
-            obj.nations(ind) = [];
+            obj.nations{ind} = {};
 
             %reduce number of nations by 1
             obj.num_nations = obj.num_nations - 1;
 
             
            
-            obj.num_objects = obj.num_objects - objects_tracking;
-            %update data quality
+            obj.num_objects = obj.num_objects - nation.tracking_capacity;
+            
+            %TODO: update data quality
+
+            %delete the empty cell of the nation removed
+            obj.nations = obj.nations(~cellfun('isempty',obj.nations));
 
         end
 
 
-        function obj = inorout(obj,agent)
+        function obj = inorout(obj)
             
             %this function makes a decision if the nation in question
             %should be accepted or rejected from the gssn
-            %Basically, can the nation afford to be in the GSSN or not
+            obj.decision = 1;
+            
 
         end
         

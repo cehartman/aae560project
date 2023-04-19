@@ -24,9 +24,20 @@ for iNation = 1:n_nations
     % diverse nations)
     
     % create nation and add to GSSA model
-    gssa_model = gssa_model.add(NationAgent()); % supply inputs 
+    %inputs are:
+    %id,sensors,sc,scs,smc,soc,dq,gm,fuzz, gdp
+    nation = NationAgent(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+    gssa_model = gssa_model.add_nation(nation); % supply inputs 
     
 end
+
+%Add GSSN object 
+%inputs: nn, no, dq, na, cost
+gssn = GSSNObject(0, 0, 0, 0, 0);
+
+gssa_model = gssa_model.add_gssn(gssn);
+
 
 % Initialize storage arrays
 
