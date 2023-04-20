@@ -47,7 +47,7 @@ classdef GlobalSSAModel
             %STEP 2: Update Nation Preferences
             
             for i = 1:obj.n_nations
-                obj = obj.nations{i}.update(total_objects,...
+                obj.nations{i} = obj.nations{i}.update(total_objects,...
                     obj.gssn.num_objects, obj.gssn.fee);
             end
 
@@ -55,6 +55,7 @@ classdef GlobalSSAModel
 
             temp = {};
             ct = 0;
+
             for i = 1:obj.n_nations
 
                 if obj.nations{i}.gssn_member == 1
@@ -63,7 +64,7 @@ classdef GlobalSSAModel
                 end
             end
 
-            obj = obj.gssn.update(temp);
+            obj.gssn = obj.gssn.update(temp);
 
             clear temp
 

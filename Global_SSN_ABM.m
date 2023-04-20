@@ -34,7 +34,7 @@ end
 
 %Add GSSN object 
 %inputs: nn, no, dq, na, cost
-gssn = GSSNObject(0, 0, 0, 0, 0);
+gssn = GSSNObject(0, 1000, 0, 0, 0);
 
 gssa_model = gssa_model.add_gssn(gssn);
 

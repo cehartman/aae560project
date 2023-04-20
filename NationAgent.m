@@ -65,7 +65,7 @@ classdef NationAgent
             %next timestep it can afford it to continue manufacturing it
             
             if obj.want_gssn == 0 && obj.need_sensor == 1 && obj.budget >= obj.sensor_manu_cost
-                obj.add_sensor(obj);
+                obj = obj.add_sensor();
             end
 
         end
@@ -140,7 +140,7 @@ classdef NationAgent
                     obj.want_gssn= 0;
 
                 
-                elseif obj.sensor_manu_cost >= gssn.fee
+                elseif obj.sensor_manu_cost >= fee
                     obj.want_gssn = 1;
 
                 end
