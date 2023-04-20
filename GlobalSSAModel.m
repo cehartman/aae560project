@@ -10,7 +10,7 @@ classdef GlobalSSAModel
     end
     
     methods
-        function obj = GlobalSSAModel() % TODO: inputs to initialize debris model
+        function obj = GlobalSSAModel(timeVec,timeStep,envParams) % TODO: inputs to initialize debris model
             % initialize model
             obj.nations = {};
             obj.n_nations = 0;
@@ -21,7 +21,7 @@ classdef GlobalSSAModel
             %obj.gssn = GSSNObject();
             
             % initialize LEO satellite/debris model
-            %obj.leo_environment = LEOModel(); %TODO: hook in Joe's debris model
+            obj.leo_environment = LEOModel(timeVec,timeStep,envParams); %TODO: hook in Joe's debris model
             
         end
         
@@ -42,7 +42,9 @@ classdef GlobalSSAModel
         function obj = timestep(obj,t)
             % commands the model to advance a time step
 
-            %STEP 1: Update Environment
+            %STEP 1: Update Environment (pass out collision info)
+            obj = obj.leo_environment.update(t);
+            
             total_objects = 1000;
             %STEP 2: Update Nation Preferences
             
@@ -74,6 +76,7 @@ classdef GlobalSSAModel
             %STEP 3: GSSN In or OUT
             
             % execute environment object, nation agents, and GSSN object updates
+            
             
         end
     end

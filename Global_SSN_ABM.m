@@ -10,12 +10,25 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all; clc; rng('default');
 
-% Initialize Global SSA model
-gssa_model = GlobalSSAModel();
-
 % Initialize Adjustable Parameters
-sim_end_time = 100*365; % 100 years in days 
 n_nations = 1;
+
+% Time
+simTime = 100; % [years]
+timeStep = 8; % [days]
+
+% Environment
+envParams.leoVol             = 5.54e11*(1e9);              % LEO shell volume [km^3]
+envParams.initialSPD         = 2e-8*(1e-9);                 % Initial spatial debris density [debris objects / km^3]
+envParams.Asat               = 40;                          % Satellite cross-sectional area [m^2]
+envParams.vRel               = 10000;                       % Debris relative collision velocity [m / sec]
+envParams.numCollisionDebris = 1000;                        % Number of new debris objects created from collision
+envParams.initalDebris = envParams.initialSPD*envParams.leoVol; % Initial number of debris objects in LEO
+
+% Initialize Global SSA model
+timeEnd  = simTime*365.2425;                            % Simulation end time [days]                                 
+timeVec  = 0:timeStep:timeEnd;    % Simulation time steps [days]
+gssa_model = GlobalSSAModel(timeVec,timeStep,envParams);
 
 % Add nation agents
 for iNation = 1:n_nations
@@ -40,12 +53,13 @@ gssa_model = gssa_model.add_gssn(gssn);
 
 
 % Initialize storage arrays
+numCollisions = zeros(1,ceil(simTime*365.2425/timeStep));
+numDebris = zeros(1,ceil(simTime*365.2425/timeStep));
+
 
 % Start Simulation Steps
-t = 0;
-while t < sim_end_time
-    % increment time
-    t = t+8; % 8 day time steps
+for t = timeVec
+
     % perform the next model step
     gssa_model = gssa_model.timestep(t);
 end
