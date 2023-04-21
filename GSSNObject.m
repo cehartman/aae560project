@@ -20,7 +20,7 @@ classdef GSSNObject
             obj.num_nations = nn;
             obj.num_objects = no; %move this to an update 
             obj.data_quality = dq;
-            obj.nations = na; 
+            obj.nations = {}; 
             obj.fee = cost;
 
         end
@@ -41,9 +41,11 @@ classdef GSSNObject
             obj.num_nations = obj.num_nations + 1;
 
             %add nation to the end of the list
-            obj.nations{end+1} = nation;
+            obj.nations{1,end+1} = {nation};
 
             obj.num_objects = obj.num_objects + nation.tracking_capacity;
+
+           
 
             %TODO: Increment data quality ?
 

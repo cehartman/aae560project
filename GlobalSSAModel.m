@@ -37,44 +37,53 @@ classdef GlobalSSAModel
             obj.gssn = gssn_agent;
         end
 
+        function obj = add_to_gssn(obj, nation)
+            obj.gssn = obj.gssn.add_nation(nation);
+            obj.n_members = obj.n_members + 1;
+
+        end
+
 
 
         function obj = timestep(obj,t)
             % commands the model to advance a time step
 
             %STEP 1: Update Environment
-            total_objects = 1000;
+            total_objects = 8000;
+
+
             %STEP 2: Update Nation Preferences
-            
             for i = 1:obj.n_nations
                 obj.nations{i} = obj.nations{i}.update(total_objects,...
                     obj.gssn.num_objects, obj.gssn.fee);
             end
 
-            %STEP 3: Update GSSN Properties
-
-            temp = {};
+            %STEP 3: Collect nations that want to be in the GSSN but are
+            %not currently for evaluation
             ct = 0;
-
             for i = 1:obj.n_nations
-
-                if obj.nations{i}.gssn_member == 1
+                if obj.nations{1,i}.gssn_member == 0 && obj.nations{1,i}.want_gssn == 1
                     ct = ct + 1;
-                    temp{ct} = members;
+                    candidate_index(ct) = i;
                 end
             end
 
-            obj.gssn = obj.gssn.update(temp);
+            %STEP 4: TODO: Need some logic here. Right now, the GSSN just
+            %lets everyone in
 
-            clear temp
+            for i = 1:length(candidate_index)
+                obj = obj.add_to_gssn(obj.nations{1,candidate_index(i)});
 
-            %nation preferences have been updated, and GSSN have been
-            %updated
+                obj.nations{1,candidate_index(i)}.gssn_member = 1;
+            end
 
 
-            %STEP 3: GSSN In or OUT
-            
-            % execute environment object, nation agents, and GSSN object updates
+
+
+            %STEP 5: Collect nations in the GSSN currently and do
+            %something?
+
+
             
         end
     end
