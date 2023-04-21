@@ -14,7 +14,7 @@ clear; close all; clc; rng('default');
 global enable_environment_updates;
 global environment_updates_only;
 enable_environment_updates = 1;
-environment_updates_only = 1;
+environment_updates_only = 0;
 
 % Initialize Adjustable Parameters
 n_nations = 1;
@@ -74,11 +74,12 @@ for iNation = 1:n_nations
     fuzz = 0;
     starting_budget = 0;
     nsat = 160;
+    launch_rate = 1.5442;
 
     newNation = NationAgent(iNation, sensors,...
         sensor_capability, sensor_const_speed,...
         sensor_mfg_cost, sensor_ops_cost, data_quality,...
-        gssn_member, fuzz, starting_budget, nsat);
+        gssn_member, fuzz, starting_budget, nsat, launch_rate);
 
     gssa_model = gssa_model.add_nation(newNation); % supply inputs 
 
