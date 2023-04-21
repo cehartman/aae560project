@@ -10,9 +10,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all; clc; rng('default');
 
+%TODO: remove this when we're ready
+global enable_environment_updates;
+global environment_updates_only;
+enable_environment_updates = 1;
+environment_updates_only = 1;
+
 % Initialize Adjustable Parameters
-sim_end_time = 100*365; % 100 years in days 
-n_nations = 100;
+n_nations = 1;
 
 % Time
 simTime = 100; % [years]
@@ -46,50 +51,71 @@ for iNation = 1:n_nations
     % create nation and add to GSSA model
     %inputs are:
     %id,sensors,sc,scs,smc,soc,dq,gm,fuzz, gdp
-    sensors = randi([1 4]);
-    sensor_capability = randi([10 1000]);
-    sensor_const_speed = randi([1 5]);
-    sensor_mfg_cost = randi([40 60]);
-    sensor_ops_cost = randi([1 5]);
+    % TODO: maybe we should move these random sample ranges to adjustable 
+    % parameters section
+%     sensors = randi([1 4]);
+%     sensor_capability = randi([10 1000]);
+%     sensor_const_speed = randi([1 5]);
+%     sensor_mfg_cost = randi([40 60]);
+%     sensor_ops_cost = randi([1 5]);
+%     data_quality = 0;
+%     gssn_member = randi([0 1]);
+%     fuzz = 0;
+%     starting_budget = randi([50 80]);
+%     nsat = 10;
+    
+    sensors = 10;
+    sensor_capability = 500;
+    sensor_const_speed = 0;
+    sensor_mfg_cost = 0;
+    sensor_ops_cost = 0;
     data_quality = 0;
-    gssn_member = randi([0 1]);
+    gssn_member = 0;
     fuzz = 0;
-    starting_budget = randi([50 80]);
+    starting_budget = 0;
+    nsat = 160;
 
-    nation = NationAgent(iNation, sensors,...
+    newNation = NationAgent(iNation, sensors,...
         sensor_capability, sensor_const_speed,...
         sensor_mfg_cost, sensor_ops_cost, data_quality,...
-        gssn_member, fuzz, starting_budget);
+        gssn_member, fuzz, starting_budget, nsat);
 
-    gssa_model = gssa_model.add_nation(nation); % supply inputs 
+    gssa_model = gssa_model.add_nation(newNation); % supply inputs 
 
-    if nation.gssn_member == 1
-        gssa_model = gssa_model.add_to_gssn(nation);
+    if newNation.gssn_member == 1
+        gssa_model = gssa_model.add_to_gssn(newNation);
     end
  
 end
 
-%Create Variables for plotting
+% Create Variables for plotting
 total_members = [];
 
 % Initialize storage arrays
-numCollisions = zeros(1,ceil(simTime*365.2425/timeStep));
-numDebris = zeros(1,ceil(simTime*365.2425/timeStep));
+
 
 
 % Start Simulation Steps
-for t = timeVec
+H = waitbar(0/timeVec(end),'Progress:');
+for t = timeVec(2:end-1)
     
     % perform the next model step
     gssa_model = gssa_model.timestep(t);
+    % update waitbar
+    waitbar(t/timeVec(end))
 
-    % increment time
-    figure(1)
-    plot(t, gssa_model.n_members,'ko')
-    hold on
+%     figure(1)
+%     plot(t, gssa_model.n_members,'ko')
+%     hold on
 
 end
+waitbar(timeVec(end)/timeVec(end));
 
-figure(1)
-xlabel('Time Step')
-ylabel('Number of Nations in GSSN')
+% figure(1)
+% xlabel('Time Step')
+% ylabel('Number of Nations in GSSN')
+
+cumulativeCollisions = cumsum(gssa_model.leo_environment.data.totalCollisions);
+totalCollisions = cumulativeCollisions(end);
+finalDebris = gssa_model.leo_environment.data.totalDebris(end);
+

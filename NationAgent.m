@@ -18,12 +18,13 @@ classdef NationAgent
         wait
         want_gssn %bool
         budget
+        satellites
      
     end
     
     methods
         
-        function obj = NationAgent(id,sensors,sc,scs,smc,soc,dq,gm,fuzz, gdp)
+        function obj = NationAgent(id,sensors,sc,scs,smc,soc,dq,gm,fuzz,gdp,nsat)
             obj.id = id;
             obj.n_sensors = sensors;
             obj.sensor_capability = sc;
@@ -40,6 +41,7 @@ classdef NationAgent
             obj.wait = 0;
             obj.want_gssn = gm;
             obj.budget = gdp;
+            obj.satellites = nsat;
             
           
 
