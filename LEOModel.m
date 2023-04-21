@@ -76,9 +76,14 @@ classdef LEOModel
             trackingSuccessProb = nation.tracking_capacity/obj.numDebris; % TODO: determine whether we should model sat-sat collisions
             
             % if the random draw is above the tracking success probability,
-            % the possible collision does occur
-            collisionOccurred = numPossibleCollisions & rand(size(numPossibleCollisions)) > trackingSuccessProb;
-            
+            % or if the randow track is below the tracking success
+            % probability but the 99% avoidance chance is failed, the
+            % possible collision does occur
+            trackSuccessDraw = rand(size(numPossibleCollisions));
+            avoidanceDraw = rand(size(numPossibleCollisions));
+            collisionOccurred = numPossibleCollisions & ((trackSuccessDraw >= trackingSuccessProb) ...
+                | (trackSuccessDraw < trackingSuccessProb & avoidanceDraw > 0.99));
+ 
         end
         
         
