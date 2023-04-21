@@ -49,7 +49,7 @@ classdef GlobalSSAModel
             % commands the model to advance a time step
 
             %STEP 1: Update Environment
-            total_objects = 8000;
+            total_objects = 5000;
 
 
             %STEP 2: Update Nation Preferences
@@ -61,20 +61,23 @@ classdef GlobalSSAModel
             %STEP 3: Collect nations that want to be in the GSSN but are
             %not currently for evaluation
             ct = 0;
+            candidate_index = 0;
             for i = 1:obj.n_nations
                 if obj.nations{1,i}.gssn_member == 0 && obj.nations{1,i}.want_gssn == 1
                     ct = ct + 1;
                     candidate_index(ct) = i;
+
                 end
             end
 
             %STEP 4: TODO: Need some logic here. Right now, the GSSN just
             %lets everyone in
+            if candidate_index ~=0
+                for i = 1:length(candidate_index)
+                    obj = obj.add_to_gssn(obj.nations{1,candidate_index(i)});
 
-            for i = 1:length(candidate_index)
-                obj = obj.add_to_gssn(obj.nations{1,candidate_index(i)});
-
-                obj.nations{1,candidate_index(i)}.gssn_member = 1;
+                    obj.nations{1,candidate_index(i)}.gssn_member = 1;
+                end
             end
 
 

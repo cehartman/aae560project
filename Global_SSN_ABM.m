@@ -15,11 +15,11 @@ gssa_model = GlobalSSAModel();
 
 % Initialize Adjustable Parameters
 sim_end_time = 100*365; % 100 years in days 
-n_nations = 2;
+n_nations = 100;
 
 %Add GSSN object 
 %inputs: nn, no, dq, na, cost
-gssn = GSSNObject(0, 1000, 0, 0, 0);
+gssn = GSSNObject(0, 3000, 0, 0, 50);
 
 gssa_model = gssa_model.add_gssn(gssn);
 
@@ -32,15 +32,15 @@ for iNation = 1:n_nations
     % create nation and add to GSSA model
     %inputs are:
     %id,sensors,sc,scs,smc,soc,dq,gm,fuzz, gdp
-    sensors = randi([1 10]);
-    sensor_capability = randi([10 500]);
+    sensors = randi([1 4]);
+    sensor_capability = randi([10 1000]);
     sensor_const_speed = randi([1 5]);
-    sensor_mfg_cost = randi([1 10]);
+    sensor_mfg_cost = randi([40 60]);
     sensor_ops_cost = randi([1 5]);
     data_quality = 0;
     gssn_member = randi([0 1]);
     fuzz = 0;
-    starting_budget = randi([10 50]);
+    starting_budget = randi([50 80]);
 
     nation = NationAgent(iNation, sensors,...
         sensor_capability, sensor_const_speed,...
@@ -67,9 +67,12 @@ total_members = [];
 % Start Simulation Steps
 t = 0;
 step = 0;
-while t < sim_end_time
+while step < 25
     step = step + 1;
     % increment time
+    figure(1)
+    plot(t, gssa_model.n_members,'ko')
+    hold on
 
     t = t+8; % 8 day time steps
 
@@ -77,3 +80,7 @@ while t < sim_end_time
     gssa_model = gssa_model.timestep(t);
     
 end
+
+figure(1)
+xlabel('Time Step')
+ylabel('Number of Nations in GSSN')

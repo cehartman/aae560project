@@ -47,7 +47,7 @@ classdef NationAgent
         
         function obj = update(obj, total_objects, gssn_objects, fee)
 
-            %does agent want a sensor?
+            
             obj = sensor_desire(obj,total_objects,gssn_objects);
 
             %does agent want to be part of the gssn? Only update if the
@@ -56,6 +56,8 @@ classdef NationAgent
             if obj.wait == 0
                 obj = gssn_desire(obj,fee);
             end
+
+
 
             %if the agent does not want to be part of the gssn but does 
             % want to add a sensor, and can afford it, 
@@ -67,6 +69,12 @@ classdef NationAgent
             if obj.want_gssn == 0 && obj.need_sensor == 1 && obj.budget >= obj.sensor_manu_cost
                 obj = obj.add_sensor();
             end
+            
+            %update tracking capacity
+            obj.tracking_capacity = obj.sensor_capability * obj.n_sensors;
+
+            %update economic conditions
+            obj = obj.update_economic_conditions();
 
         end
         
@@ -136,11 +144,11 @@ classdef NationAgent
 
                 %if it's cheaper to mfg a sensor vs joining gssn, nation
                 %will choose to make its own
-                if obj.sensor_manu_cost < fee
+                if obj.sensor_manu_cost < fee || obj.budget < fee
                     obj.want_gssn= 0;
 
                 
-                elseif obj.sensor_manu_cost >= fee
+                elseif obj.sensor_manu_cost >= fee && obj.budget > fee
                     obj.want_gssn = 1;
 
                 end
@@ -173,6 +181,8 @@ classdef NationAgent
             %budget based on standard normal distribution
 
             obj.budget = obj.budget + obj.budget * rand()/100;
+            obj.sensor_manu_cost = obj.sensor_manu_cost*1.03;
+            
 
 
         end
