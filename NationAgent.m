@@ -38,7 +38,7 @@ classdef NationAgent
             obj.total_cost = 0; % from sensor construction, sensor operation, satellite collisions
             obj.need_sensor = 0; %binary 0 = does not need sensor, 1 = need sensor
             obj.wait = 0;
-            obj.want_gssn = 0;
+            obj.want_gssn = gm;
             obj.budget = gdp;
             
           
@@ -50,13 +50,8 @@ classdef NationAgent
             
             obj = sensor_desire(obj,total_objects,gssn_objects);
 
-            %does agent want to be part of the gssn? Only update if the
-            %obj.wait = 0 (not in the middle of adding a sensor)
-
-            if obj.wait == 0
-                obj = gssn_desire(obj,fee);
-            end
-
+            obj = gssn_desire(obj,fee);
+           
 
 
             %if the agent does not want to be part of the gssn but does 
@@ -182,7 +177,7 @@ classdef NationAgent
 
             obj.budget = obj.budget + obj.budget * rand()/100;
             obj.sensor_manu_cost = obj.sensor_manu_cost*1.03;
-            
+
 
 
         end

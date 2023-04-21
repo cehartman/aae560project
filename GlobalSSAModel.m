@@ -43,13 +43,18 @@ classdef GlobalSSAModel
 
         end
 
+        function obj = remove_from_gssn(obj, nation)
+            obj.gssn = obj.gssn.remove_nation(nation);
+            obj.n_members = obj.n_members - 1;
+
+        end
 
 
         function obj = timestep(obj,t)
             % commands the model to advance a time step
 
             %STEP 1: Update Environment
-            total_objects = 5000;
+            total_objects = 8000;
 
 
             %STEP 2: Update Nation Preferences
@@ -70,7 +75,19 @@ classdef GlobalSSAModel
                 end
             end
 
-            %STEP 4: TODO: Need some logic here. Right now, the GSSN just
+            %STEP 4: Collect Nations that want out of the GSSN
+
+            want_out = 0;
+            ct = 0;
+            for i = 1:obj.n_nations
+                if obj.nations{1,i}.gssn_member == 1 && obj.nations{1,i}.want_gssn == 0
+                    ct = ct + 1;
+                    want_out(ct) = i;
+
+                end
+            end
+
+            %STEP 5: TODO: Need some logic here. Right now, the GSSN just
             %lets everyone in
             if candidate_index ~=0
                 for i = 1:length(candidate_index)
@@ -81,10 +98,16 @@ classdef GlobalSSAModel
             end
 
 
+            if want_out ~=0
+                for i = 1:length(want_out)
+                    obj = obj.remove_from_gssn(obj.nations{1,want_out(i)});
 
+                    obj.nations{1,want_out(i)}.gssn_member = 0;
+                end
+            end
 
-            %STEP 5: Collect nations in the GSSN currently and do
-            %something?
+            %gssn increases fee
+            obj.gssn.fee = obj.gssn.fee;
 
 
             

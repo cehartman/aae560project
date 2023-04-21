@@ -19,7 +19,7 @@ n_nations = 100;
 
 %Add GSSN object 
 %inputs: nn, no, dq, na, cost
-gssn = GSSNObject(0, 3000, 0, 0, 50);
+gssn = GSSNObject(0, 0, 0, 0, 50);
 
 gssa_model = gssa_model.add_gssn(gssn);
 

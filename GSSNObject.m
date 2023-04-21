@@ -24,6 +24,7 @@ classdef GSSNObject
             obj.fee = cost;
 
         end
+        
         function obj = update(obj, agents)
             obj.nations = agents;
 
@@ -34,6 +35,8 @@ classdef GSSNObject
 
             obj.num_objects = sum;
         end
+        
+        
 
         %adds a nation to the GSSN
         function obj = add_nation(obj,nation)
@@ -41,7 +44,7 @@ classdef GSSNObject
             obj.num_nations = obj.num_nations + 1;
 
             %add nation to the end of the list
-            obj.nations{1,end+1} = {nation};
+            obj.nations{1,end+1} = nation;
 
             obj.num_objects = obj.num_objects + nation.tracking_capacity;
 
@@ -53,21 +56,9 @@ classdef GSSNObject
 
         function obj = remove_nation(obj,nation)
 
-            %search the list and return the index of the nation
-            ind = 0;
-            for i = 1:obj.num_nations
-                if obj.nations{i}.id == nation.id
-                    ind = i; %index of nation to be removed
-                end
-            end
-
-            %error if index is never updated, nation name is not found
-            if ind == 0
-                error('In: gssaAgent.m. Nation trying to be removed is not found!')
-            end
 
             %delete the nation from the list
-            obj.nations{ind} = {};
+            obj.nations{nation.id} = {};
 
             %reduce number of nations by 1
             obj.num_nations = obj.num_nations - 1;
@@ -84,11 +75,10 @@ classdef GSSNObject
         end
 
 
-        function obj = inorout(obj)
+        function obj = inorout(obj, nation)
+
             
-            %this function makes a decision if the nation in question
-            %should be accepted or rejected from the gssn
-            obj.decision = 1;
+            
             
 
         end
