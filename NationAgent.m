@@ -18,12 +18,14 @@ classdef NationAgent
         wait
         want_gssn %bool
         budget
+        satellites
+        launch_rate
      
     end
     
     methods
         
-        function obj = NationAgent(id,sensors,sc,scs,smc,soc,dq,gm,fuzz, gdp)
+        function obj = NationAgent(id,sensors,sc,scs,smc,soc,dq,gm,fuzz,gdp,nsat,lr)
             obj.id = id;
             obj.n_sensors = sensors;
             obj.sensor_capability = sc;
@@ -40,6 +42,8 @@ classdef NationAgent
             obj.wait = 0;
             obj.want_gssn = gm;
             obj.budget = gdp;
+            obj.satellites = nsat;
+            obj.launch_rate = lr;
             
           
 
@@ -70,6 +74,9 @@ classdef NationAgent
 
             %update economic conditions
             obj = obj.update_economic_conditions();
+            
+            % launch satellite(s) (maybe)
+            obj = obj.launch_satellites();
 
         end
         
@@ -185,6 +192,14 @@ classdef NationAgent
         function obj = update_costs_and_revenue(obj)
             % costs from sensor manufacturing/operation, revenue from
             % successful space operations
+        end
+        
+        function obj = launch_satellites(obj)
+            launchEvents = floor(normrnd(obj.launch_rate,0.5));
+            if launchEvents < 0
+               launchEvents = 0; 
+            end
+            obj.satellites = obj.satellites + launchEvents;
         end
         
     end
