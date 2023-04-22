@@ -17,7 +17,7 @@ enable_environment_updates = 1;
 environment_updates_only = 0;
 
 % Initialize Adjustable Parameters
-n_nations = 1;
+n_nations = 10;
 
 % Time
 simTime = 100; % [years]
@@ -53,28 +53,17 @@ for iNation = 1:n_nations
     %id,sensors,sc,scs,smc,soc,dq,gm,fuzz, gdp
     % TODO: maybe we should move these random sample ranges to adjustable 
     % parameters section
-%     sensors = randi([1 4]);
-%     sensor_capability = randi([10 1000]);
-%     sensor_const_speed = randi([1 5]);
-%     sensor_mfg_cost = randi([40 60]);
-%     sensor_ops_cost = randi([1 5]);
-%     data_quality = 0;
-%     gssn_member = randi([0 1]);
-%     fuzz = 0;
-%     starting_budget = randi([50 80]);
-%     nsat = 10;
-    
-    sensors = 10;
-    sensor_capability = 500;
-    sensor_const_speed = 0;
-    sensor_mfg_cost = 0;
-    sensor_ops_cost = 0;
+    sensors = randi([1 4]);
+    sensor_capability = randi([10 1000]);
+    sensor_const_speed = randi([1 5]);
+    sensor_mfg_cost = randi([40 60]);
+    sensor_ops_cost = randi([1 5]);
     data_quality = 0;
-    gssn_member = 0;
+    gssn_member = randi([0 1]);
     fuzz = 0;
-    starting_budget = 0;
-    nsat = 160;
-    launch_rate = 1.5442;
+    starting_budget = randi([50 80]);
+    nsat = 10;
+    launch_rate = 70.5/365.2425*timeStep;
 
     newNation = NationAgent(iNation, sensors,...
         sensor_capability, sensor_const_speed,...
