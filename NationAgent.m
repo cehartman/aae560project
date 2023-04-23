@@ -28,6 +28,7 @@ classdef NationAgent
         satellites
         launch_rate
         data
+        econUpdates
      
     end
     
@@ -60,6 +61,7 @@ classdef NationAgent
             obj.budget = gdp;
             obj.satellites = nsat;
             obj.launch_rate = lr;
+            obj.econUpdates = 0;
             
             % initialize data for analysis
             obj.data.totalSensors = ones(size(timeVec))*obj.n_sensors;
@@ -67,11 +69,18 @@ classdef NationAgent
             obj.data.totalSatellites = ones(size(timeVec))*obj.satellites;
         end
         
-        function obj = update(obj, t, total_objects, gssn_objects, fee)
+        function obj = update(obj, t, total_objects, gssn_objects, fee, econParams)
 
             % determine storage array index from current sim time
             tIdx = t/obj.timeStep+1;
             
+            % possibly update economic conditions (only performed annually)
+            if mod(t,365.2425) < 8
+                obj.econUpdates = obj.econUpdates + 1;
+                obj = obj.update_economic_conditions(econParams);
+            end
+            
+            % nation evaluates if it desires a new sensor
             if obj.need_sensor == 0 || (t - obj.last_sensor_request) >= obj.sensor_request_rate
                 obj = obj.sensor_desire(t,total_objects,gssn_objects);
                 if obj.need_sensor == 1
@@ -102,11 +111,11 @@ classdef NationAgent
             %update tracking capacity
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
 
-            %update economic conditions
-            obj = obj.update_economic_conditions();
-            
             % launch satellite(s) (maybe)
-            obj = obj.launch_satellites();
+            obj = obj.launch_satellites(econParams);
+            
+            % update national costs and revenue
+            obj = obj.update_costs_and_revenue(econParams);
             
             % update data
             obj.data.totalSensors(tIdx) = obj.n_sensors;
@@ -210,7 +219,7 @@ classdef NationAgent
 %             
 %         end
         
-        function obj = update_economic_conditions(obj)
+        function obj = update_economic_conditions(obj,econParams)
             % "The SoS model also needs to support the injection of events 
             % that shape the economic or political conditions under which 
             % each nation is operating at that time, which affects 
@@ -222,24 +231,48 @@ classdef NationAgent
             %take the budget, and add or subtract a percentage of the
             %budget based on standard normal distribution
 
-            obj.budget = obj.budget + obj.budget * rand()/100;
-            obj.sensor_manu_cost = obj.sensor_manu_cost*1.03;
+            obj.budget = obj.budget + obj.budget; %*normrnd(0,1); TODO: decide on budget fluctuation
+            obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
 
 
 
         end
         
-        function obj = update_costs_and_revenue(obj)
-            % costs from sensor manufacturing/operation, revenue from
-            % successful space operations
+        function obj = update_costs_and_revenue(obj,econParams)
+            % costs from sensor operation, satellite operation, revenue from
+            % satellite operations. Manufacturing costs applied elsewhere.
+            
+            % sensor operation costs
+            currentSensOpCost = obj.n_sensors*econParams.sensorOpCost*obj.timeStep/365.2425;
+            obj.total_cost = obj.total_cost + currentSensOpCost;
+            obj.budget = obj.budget - currentSensOpCost;
+            
+            % satelite operation costs
+            currentSatOpCost = obj.satellites*econParams.satOpCost*obj.timeStep/365.2425;
+            obj.total_cost = obj.total_cost + currentSatOpCost;
+            obj.budget = obj.budget - currentSatOpCost;
+            
+            % satellite operation revenue
+            currentSatRev = obj.satellites*econParams.satOpRev*obj.timeStep/365.2425;
+            obj.revenue = obj.revenue + currentSatRev;
+            obj.budget = obj.budget + currentSatRev;
         end
         
-        function obj = launch_satellites(obj)
+        function obj = launch_satellites(obj,econParams)
+            %TODO: what economic considerations determine when satellites are launched?
             launchEvents = round(normrnd(obj.launch_rate,0.5));
             if launchEvents < 0
                launchEvents = 0; 
             end
-            obj.satellites = obj.satellites + launchEvents;
+            remainingLaunches = launchEvents;
+            while remainingLaunches > 0
+                if obj.budget > econParams.newSatCost
+                    obj.satellites = obj.satellites + 1;
+                    obj.total_cost = obj.total_cost + econParams.newSatCost;
+                    obj.budget = obj.budget - econParams.newSatCost;
+                end
+                remainingLaunches = remainingLaunches-1;
+            end
         end
         
     end

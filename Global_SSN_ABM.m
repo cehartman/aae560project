@@ -20,6 +20,16 @@ environment_updates_only = 0;
 % Initialize Adjustable Parameters
 n_nations = 1;
 
+
+% Economics
+econParams.newSatCost = 171;    % million $ from OP
+econParams.satOpCost = 1;       % million $ / year from OP
+econParams.satOpRev = 279000/8261; % million $ / year
+econParams.newSensorCost = 1600; % million $ from Space Fence
+econParams.sensorOpCost = 6;    % million $ / year from $33m/5yrs5mo for SF
+econParams.inflation = 1.03; % assume 3% annually 
+nationalBudgetsRange = [50000 80000]; % million $
+
 % Time
 simTime = 100; % [years]
 timeStep = 8; % [days]
@@ -62,7 +72,7 @@ for iNation = 1:n_nations
 %     data_quality = 0;
 %     gssn_member = randi([0 1]);
 %     fuzz = 0;
-%     starting_budget = randi([50 80]);
+%     starting_budget = randi(nationalBudgetsRange);
 %     nsat = 10;
     
     sensors = 10;
@@ -74,9 +84,9 @@ for iNation = 1:n_nations
     tech_cap = [1 0.2]; % mean stddev
     gssn_member = 0;%randi([0 1]);
     fuzz = 0;
-    starting_budget = randi([50 80]);
-    nsat = 160;
-    launch_rate = 70.5/365.2425*timeStep;
+    starting_budget = randi(nationalBudgetsRange);
+    nsat = 160; % TODO: make random
+    launch_rate = 70.5/365.2425*timeStep; % TODO: based on what?
 
     newNation = NationAgent(timeVec, timeStep, iNation, sensors,...
         sensor_capability, sensor_request_rate, sensor_const_speed,...
@@ -100,10 +110,10 @@ total_members = [];
 
 % Start Simulation Steps
 H = waitbar(0/timeVec(end),'Progress:');
-for t = timeVec(1:end)
+for t = timeVec(2:end)
     
     % perform the next model step
-    gssa_model = gssa_model.timestep(t);
+    gssa_model = gssa_model.timestep(t,econParams);
     % update waitbar
     waitbar(t/timeVec(end),H)
 
