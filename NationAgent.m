@@ -19,7 +19,7 @@ classdef NationAgent
         total_cost
         need_sensor %bool
         last_sensor_request
-        wait
+        wait_con
         want_gssn %bool
         budget
         satellites
@@ -47,7 +47,7 @@ classdef NationAgent
             obj.revenue = 0; % from successful space operations (maybe acrued each time step without a collision?)
             obj.total_cost = 0; % from sensor construction, sensor operation, satellite collisions
             obj.need_sensor = 0; %binary 0 = does not need sensor, 1 = need sensor
-            obj.wait = 0;
+            obj.wait_con = 0;
             obj.last_sensor_request = 0;
             obj.want_gssn = gm;
             obj.budget = gdp;
@@ -65,8 +65,11 @@ classdef NationAgent
             % determine storage array index from current sim time
             tIdx = t/obj.timeStep+1;
             
-            if (t - obj.last_sensor_request) < obj.sensor_request_rate
+            if obj.need_sensor == 0 || (t - obj.last_sensor_request) >= obj.sensor_request_rate
                 obj = obj.sensor_desire(t,total_objects,gssn_objects);
+                if obj.need_sensor == 1
+                    disp(['Nation ' num2str(obj.id) ' requested sensor at year ' num2str(years(days(t)))]);
+                end
             end
 
             obj = obj.gssn_desire(fee);
@@ -80,16 +83,14 @@ classdef NationAgent
             %if a nation cannot afford it, it will have to wait until the
             %next timestep it can afford it to continue manufacturing it
             
-            if obj.want_gssn == 0 && obj.need_sensor == 1 ...
+%             if obj.want_gssn == 0 && 
+            if obj.need_sensor == 1 ...
                     && obj.budget >= obj.sensor_manu_cost
                 obj = obj.add_sensor();
+                if obj.wait_con == 0
+                    disp(['Nation ' num2str(obj.id) ' added sensor at year ' num2str(years(days(t)))]);
+                end
             end
-            % TODO: Incorporate sensor request rate logic (e.g. 1 per year)
-%             if obj.want_gssn == 0 && obj.need_sensor == 1 ...
-%                     && (t - obj.last_sensor_request) >= obj.sensor_request_rate ...
-%                     && obj.budget >= obj.sensor_manu_cost
-%                 obj = obj.add_sensor();
-%             end
             
             %update tracking capacity
             obj.tracking_capacity = obj.sensor_capability * obj.n_sensors;
@@ -126,7 +127,7 @@ classdef NationAgent
 
             if total_tracked < 1.2 * total_objects
                 obj.need_sensor = 1;
-%                 obj.last_sensor_request = t;
+                obj.last_sensor_request = t;
             else
                 obj.need_sensor = 0;
             end
@@ -141,19 +142,20 @@ classdef NationAgent
             % the sensor to be built
 
             %if the agent hasn't been waiting long enough, keep waiting
-            if obj.wait < obj.sensor_con_speed
-                obj.wait = obj.wait + 1;
+            if obj.wait_con < obj.sensor_con_speed
+                obj.wait_con = obj.wait_con + 1;
 
             %if enough time has passed, add the cost of the sensor mfg to
             %the total cost, and increment the number of sensors
-            elseif obj.wait >= obj.sensor_con_speed
+            elseif obj.wait_con >= obj.sensor_con_speed
                 obj.total_cost = obj.total_cost + obj.sensor_manu_cost;
                 obj.n_sensors = obj.n_sensors + 1;
                 
                 %add sensor with a random data quality
                 obj.data_quality = randi([1 3]);
-
-                obj.wait = 0;
+                
+                %reset construction wait counter
+                obj.wait_con = 0;
 
             end
 
