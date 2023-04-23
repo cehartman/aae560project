@@ -19,8 +19,8 @@ classdef LEOModel
             obj.numDebris = envParams.initalDebris;
             obj.SPD = envParams.initialSPD;
             
-            % initialize debris/collisions storage arrays
-            obj.data.totalDebris = ones(size(timeVec))*obj.params.initalDebris;
+            % initialize debris/collisions storage data
+            obj.data.totalDebris = zeros(size(timeVec));
             obj.data.totalCollisions = zeros(size(timeVec));
         end
         
@@ -56,9 +56,8 @@ classdef LEOModel
             end
             
             % update total debris
-            obj.data.totalDebris(tIdx+1) = obj.data.totalDebris(tIdx) + newDebris;
             obj.numDebris = obj.numDebris + newDebris;
-
+            obj.data.totalDebris(tIdx) = obj.numDebris;
             
         end
         
@@ -76,12 +75,12 @@ classdef LEOModel
             trackingSuccessProb = nation.tracking_capacity/obj.numDebris; % TODO: determine whether we should model sat-sat collisions
             
             % if the random draw is above the tracking success probability,
-            % or if the randow track is below the tracking success
+            % or if the random draw is below the tracking success
             % probability but the 99% avoidance chance is failed, the
             % possible collision does occur
             trackSuccessDraw = rand(size(numPossibleCollisions));
             avoidanceDraw = rand(size(numPossibleCollisions));
-            collisionOccurred = numPossibleCollisions & ((trackSuccessDraw >= trackingSuccessProb) ...
+            collisionOccurred = numPossibleCollisions > 0 & ((trackSuccessDraw >= trackingSuccessProb) ...
                 | (trackSuccessDraw < trackingSuccessProb & avoidanceDraw > 0.99));
  
         end

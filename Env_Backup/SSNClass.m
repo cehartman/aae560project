@@ -24,7 +24,8 @@ classdef SSNClass
             obj = obj.AddNation(10,500,160,8);
             obj = obj.InitializeData;
             
-            launchEvents = zeros(size(obj.params.timeVec));
+            launchEvents = floor(normrnd(5*70.5/365.2425*obj.params.timeStep,1,size(obj.params.timeVec)));
+            launchEvents(launchEvents < 0) = 0;
             retireIdxShift = find(obj.params.timeVec <= obj.nationAgent.info.orbitPeriod*365.2425,1,'last');
             retireEvents = circshift(launchEvents,retireIdxShift);
             retireEvents(1:retireIdxShift) = 0;
@@ -116,7 +117,7 @@ classdef SSNClass
             c = obj.env.SPD*obj.params.Asat*obj.params.vRel*obj.params.timeStep*86400;
             numPossibleCollisions = poissrnd(c,obj.nationAgent.info.currentSat,1);
             collisionOccurred = numPossibleCollisions > obj.nationAgent.info.currentGBS * obj.nationAgent.info.trackCap;% ...
-                %| rand(1,obj.nationAgent.info.currentSat) > 0.99.^numPossibleCollisions;
+                %| rand(obj.nationAgent.info.currentSat,1) > 0.99.^numPossibleCollisions;
         end
         
         %------------------------------------------------------------------

@@ -1,10 +1,13 @@
 classdef NationAgent
     
     properties
+        timeVec
+        timeStep
         id
         n_sensors
         sensor_capability
         tracking_capacity
+        sensor_request_rate
         sensor_con_speed
         sensor_manu_cost % per nation or same for all nations?
         sensor_oper_cost
@@ -15,21 +18,26 @@ classdef NationAgent
         revenue
         total_cost
         need_sensor %bool
+        last_sensor_request
         wait
         want_gssn %bool
         budget
         satellites
         launch_rate
+        data
      
     end
     
     methods
         
-        function obj = NationAgent(id,sensors,sc,scs,smc,soc,dq,gm,fuzz,gdp,nsat,lr)
+        function obj = NationAgent(timeVec,timeStep,id,sensors,sc,srr,scs,smc,soc,dq,gm,fuzz,gdp,nsat,lr)
+            obj.timeVec = timeVec;
+            obj.timeStep = timeStep;
             obj.id = id;
             obj.n_sensors = sensors;
             obj.sensor_capability = sc;
             obj.tracking_capacity = sensors*sc;
+            obj.sensor_request_rate = srr;
             obj.sensor_con_speed = scs;
             obj.sensor_manu_cost = smc;
             obj.sensor_oper_cost = soc;
@@ -40,21 +48,28 @@ classdef NationAgent
             obj.total_cost = 0; % from sensor construction, sensor operation, satellite collisions
             obj.need_sensor = 0; %binary 0 = does not need sensor, 1 = need sensor
             obj.wait = 0;
+            obj.last_sensor_request = 0;
             obj.want_gssn = gm;
             obj.budget = gdp;
             obj.satellites = nsat;
             obj.launch_rate = lr;
             
-          
-
+            % initialize data for analysis
+            obj.data.totalSensors = ones(size(timeVec))*obj.n_sensors;
+            obj.data.trackingCapacity = ones(size(timeVec))*obj.tracking_capacity;
+            obj.data.totalSatellites = ones(size(timeVec))*obj.satellites;
         end
         
-        function obj = update(obj, total_objects, gssn_objects, fee)
+        function obj = update(obj, t, total_objects, gssn_objects, fee)
 
+            % determine storage array index from current sim time
+            tIdx = t/obj.timeStep+1;
             
-            obj = sensor_desire(obj,total_objects,gssn_objects);
+            if (t - obj.last_sensor_request) < obj.sensor_request_rate
+                obj = obj.sensor_desire(t,total_objects,gssn_objects);
+            end
 
-            obj = gssn_desire(obj,fee);
+            obj = obj.gssn_desire(fee);
            
 
 
@@ -65,9 +80,16 @@ classdef NationAgent
             %if a nation cannot afford it, it will have to wait until the
             %next timestep it can afford it to continue manufacturing it
             
-            if obj.want_gssn == 0 && obj.need_sensor == 1 && obj.budget >= obj.sensor_manu_cost
+            if obj.want_gssn == 0 && obj.need_sensor == 1 ...
+                    && obj.budget >= obj.sensor_manu_cost
                 obj = obj.add_sensor();
             end
+            % TODO: Incorporate sensor request rate logic (e.g. 1 per year)
+%             if obj.want_gssn == 0 && obj.need_sensor == 1 ...
+%                     && (t - obj.last_sensor_request) >= obj.sensor_request_rate ...
+%                     && obj.budget >= obj.sensor_manu_cost
+%                 obj = obj.add_sensor();
+%             end
             
             %update tracking capacity
             obj.tracking_capacity = obj.sensor_capability * obj.n_sensors;
@@ -77,10 +99,15 @@ classdef NationAgent
             
             % launch satellite(s) (maybe)
             obj = obj.launch_satellites();
+            
+            % update data
+            obj.data.totalSensors(tIdx) = obj.n_sensors;
+            obj.data.trackingCapacity(tIdx) = obj.tracking_capacity;
+            obj.data.totalSatellites(tIdx) = obj.satellites;
 
         end
         
-        function obj = sensor_desire(obj, total_objects, gssn_objects)
+        function obj = sensor_desire(obj, t, total_objects, gssn_objects)
 
             %this method requires input of the total number of objects in
             %the environment and updates the desire of the agent to build a
@@ -99,6 +126,7 @@ classdef NationAgent
 
             if total_tracked < 1.2 * total_objects
                 obj.need_sensor = 1;
+%                 obj.last_sensor_request = t;
             else
                 obj.need_sensor = 0;
             end
@@ -123,7 +151,7 @@ classdef NationAgent
                 obj.n_sensors = obj.n_sensors + 1;
                 
                 %add sensor with a random data quality
-                obj.data_quality(end+1) = randi([1 3]);
+                obj.data_quality = randi([1 3]);
 
                 obj.wait = 0;
 
@@ -132,7 +160,7 @@ classdef NationAgent
         end
         
         function obj = gssn_desire(obj, fee)
-            % nations decides whether to join, leave, or stay in the GSSN
+            % nation decides whether to join, leave, or stay in the GSSN
 
             %if an agent doesn't need a sensor, nothing will change here
             %if its current needs are not met, and the agent is not in the
@@ -195,7 +223,7 @@ classdef NationAgent
         end
         
         function obj = launch_satellites(obj)
-            launchEvents = floor(normrnd(obj.launch_rate,0.5));
+            launchEvents = round(normrnd(obj.launch_rate,0.5));
             if launchEvents < 0
                launchEvents = 0; 
             end
