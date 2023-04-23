@@ -71,7 +71,7 @@ for iNation = 1:n_nations
     sensor_const_speed = 3*365/timeStep;
     sensor_mfg_cost = 0;
     sensor_ops_cost = 0;
-    data_quality = 0;
+    tech_cap = [1 0.2]; % mean stddev
     gssn_member = 0;%randi([0 1]);
     fuzz = 0;
     starting_budget = randi([50 80]);
@@ -80,7 +80,7 @@ for iNation = 1:n_nations
 
     newNation = NationAgent(timeVec, timeStep, iNation, sensors,...
         sensor_capability, sensor_request_rate, sensor_const_speed,...
-        sensor_mfg_cost, sensor_ops_cost, data_quality,...
+        sensor_mfg_cost, sensor_ops_cost, tech_cap,...
         gssn_member, fuzz, starting_budget, nsat, launch_rate);
 
     gssa_model = gssa_model.add_nation(newNation); % supply inputs 

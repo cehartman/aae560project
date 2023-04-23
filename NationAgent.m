@@ -6,6 +6,7 @@ classdef NationAgent
         id
         n_sensors
         sensor_capability
+        sensor_tracking_capacity
         tracking_capacity
         sensor_request_rate
         sensor_con_speed
@@ -14,7 +15,9 @@ classdef NationAgent
         gssn_member % bool
         fuzzing % bool
         economic_conditions
-        data_quality %array of sensor data qualities
+        tech_cap % technological capability (mean and std dev)
+        sensor_data_quality %array of sensor data qualities
+        nation_data_quality %nation data quality (avg of sensor data qualities)
         revenue
         total_cost
         need_sensor %bool
@@ -30,18 +33,22 @@ classdef NationAgent
     
     methods
         
-        function obj = NationAgent(timeVec,timeStep,id,sensors,sc,srr,scs,smc,soc,dq,gm,fuzz,gdp,nsat,lr)
+        function obj = NationAgent(timeVec,timeStep,id,sensors,sc,srr,scs,smc,soc,tc,gm,fuzz,gdp,nsat,lr)
             obj.timeVec = timeVec;
             obj.timeStep = timeStep;
             obj.id = id;
             obj.n_sensors = sensors;
             obj.sensor_capability = sc;
-            obj.tracking_capacity = sensors*sc;
             obj.sensor_request_rate = srr;
             obj.sensor_con_speed = scs;
             obj.sensor_manu_cost = smc;
             obj.sensor_oper_cost = soc;
-            obj.data_quality = dq;
+            obj.tech_cap = tc;
+            obj.sensor_data_quality = normrnd(tc(1),tc(2),1,sensors);
+            obj.sensor_data_quality(obj.sensor_data_quality>1) = 1; %cap sensor data quality at 1
+            obj.nation_data_quality = mean(obj.sensor_data_quality);
+            obj.sensor_tracking_capacity = sc*obj.sensor_data_quality;
+            obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
             obj.gssn_member = gm;
             obj.fuzzing = fuzz;
             obj.revenue = 0; % from successful space operations (maybe acrued each time step without a collision?)
@@ -93,7 +100,7 @@ classdef NationAgent
             end
             
             %update tracking capacity
-            obj.tracking_capacity = obj.sensor_capability * obj.n_sensors;
+            obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
 
             %update economic conditions
             obj = obj.update_economic_conditions();
@@ -152,7 +159,10 @@ classdef NationAgent
                 obj.n_sensors = obj.n_sensors + 1;
                 
                 %add sensor with a random data quality
-                obj.data_quality = randi([1 3]);
+                sdq = normrnd(obj.tech_cap(1),obj.tech_cap(2));
+                obj.sensor_data_quality(end+1) = sdq;
+                obj.nation_data_quality = mean(obj.sensor_data_quality);
+                obj.sensor_tracking_capacity(end+1) = obj.sensor_capability*sdq;
                 
                 %reset construction wait counter
                 obj.wait_con = 0;
