@@ -20,7 +20,7 @@ classdef GSSNObject
             obj.num_nations = nn;
             obj.num_objects = no; %move this to an update 
             obj.data_quality = dq;
-            obj.nations = {}; 
+            obj.nations = na; 
             obj.fee = cost;
 
         end

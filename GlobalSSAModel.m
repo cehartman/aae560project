@@ -64,7 +64,7 @@ classdef GlobalSSAModel
             if ~environment_updates_only % TODO: remove
                 %STEP 2: Update Nation Preferences
                 for i = 1:obj.n_nations
-                    obj.nations{i} = obj.nations{i}.update(total_objects,...
+                    obj.nations{i} = obj.nations{i}.update(t, total_objects,...
                         obj.gssn.num_objects, obj.gssn.fee);
                 end
                 

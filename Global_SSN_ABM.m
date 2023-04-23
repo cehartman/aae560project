@@ -9,6 +9,7 @@
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all; clc; rng('default');
+F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
 
 %TODO: remove this when we're ready
 global enable_environment_updates;
@@ -17,7 +18,7 @@ enable_environment_updates = 1;
 environment_updates_only = 0;
 
 % Initialize Adjustable Parameters
-n_nations = 10;
+n_nations = 1;
 
 % Time
 simTime = 100; % [years]
@@ -26,7 +27,7 @@ timeStep = 8; % [days]
 % Environment
 envParams.leoVol             = 5.54e11*(1e9);              % LEO shell volume [km^3]
 envParams.initialSPD         = 2e-8*(1e-9);                 % Initial spatial debris density [debris objects / km^3]
-envParams.Asat               = 40;                          % Satellite cross-sectional area [m^2]
+envParams.Asat               = 10;                          % Satellite cross-sectional area [m^2]
 envParams.vRel               = 10000;                       % Debris relative collision velocity [m / sec]
 envParams.numCollisionDebris = 1000;                        % Number of new debris objects created from collision
 envParams.initalDebris = envParams.initialSPD*envParams.leoVol; % Initial number of debris objects in LEO
@@ -38,7 +39,7 @@ gssa_model = GlobalSSAModel(timeVec,timeStep,envParams);
 
 %Add GSSN object 
 %inputs: nn, no, dq, na, cost
-gssn = GSSNObject(0, 0, 0, 0, 50);
+gssn = GSSNObject(0, 0, 0, {}, 50);
 
 gssa_model = gssa_model.add_gssn(gssn);
 
@@ -53,20 +54,32 @@ for iNation = 1:n_nations
     %id,sensors,sc,scs,smc,soc,dq,gm,fuzz, gdp
     % TODO: maybe we should move these random sample ranges to adjustable 
     % parameters section
-    sensors = randi([1 4]);
-    sensor_capability = randi([10 1000]);
-    sensor_const_speed = randi([1 5]);
-    sensor_mfg_cost = randi([40 60]);
-    sensor_ops_cost = randi([1 5]);
+%     sensors = randi([1 4]);
+%     sensor_capability = randi([10 1000]);
+%     sensor_const_speed = randi([1 5]);
+%     sensor_mfg_cost = randi([40 60]);
+%     sensor_ops_cost = randi([1 5]);
+%     data_quality = 0;
+%     gssn_member = randi([0 1]);
+%     fuzz = 0;
+%     starting_budget = randi([50 80]);
+%     nsat = 10;
+    
+    sensors = 10;
+    sensor_capability = 500;
+    sensor_request_rate = 0;%1*365/timeStep;
+    sensor_const_speed = 0;%3*365/timeStep;
+    sensor_mfg_cost = 0;
+    sensor_ops_cost = 0;
     data_quality = 0;
     gssn_member = randi([0 1]);
     fuzz = 0;
     starting_budget = randi([50 80]);
-    nsat = 10;
+    nsat = 160;
     launch_rate = 70.5/365.2425*timeStep;
 
-    newNation = NationAgent(iNation, sensors,...
-        sensor_capability, sensor_const_speed,...
+    newNation = NationAgent(timeVec, timeStep, iNation, sensors,...
+        sensor_capability, sensor_request_rate, sensor_const_speed,...
         sensor_mfg_cost, sensor_ops_cost, data_quality,...
         gssn_member, fuzz, starting_budget, nsat, launch_rate);
 
@@ -87,25 +100,22 @@ total_members = [];
 
 % Start Simulation Steps
 H = waitbar(0/timeVec(end),'Progress:');
-for t = timeVec(2:end-1)
+for t = timeVec(2:end)
     
     % perform the next model step
     gssa_model = gssa_model.timestep(t);
     % update waitbar
-    waitbar(t/timeVec(end))
+    waitbar(t/timeVec(end),H)
 
 %     figure(1)
 %     plot(t, gssa_model.n_members,'ko')
 %     hold on
 
 end
-waitbar(timeVec(end)/timeVec(end));
+waitbar(timeVec(end)/timeVec(end),H,'Simulation Complete!');
 
 % figure(1)
 % xlabel('Time Step')
 % ylabel('Number of Nations in GSSN')
 
-cumulativeCollisions = cumsum(gssa_model.leo_environment.data.totalCollisions);
-totalCollisions = cumulativeCollisions(end);
-finalDebris = gssa_model.leo_environment.data.totalDebris(end);
-
+[finalCollisions, finalDebris] = GlobalSSN_AnalysisPlots(gssa_model,timeVec);
