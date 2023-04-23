@@ -100,7 +100,7 @@ total_members = [];
 
 % Start Simulation Steps
 H = waitbar(0/timeVec(end),'Progress:');
-for t = timeVec(2:end)
+for t = timeVec(1:end)
     
     % perform the next model step
     gssa_model = gssa_model.timestep(t);

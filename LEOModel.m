@@ -20,7 +20,7 @@ classdef LEOModel
             obj.SPD = envParams.initialSPD;
             
             % initialize debris/collisions storage data
-            obj.data.totalDebris = ones(size(timeVec))*obj.params.initalDebris;
+            obj.data.totalDebris = zeros(size(timeVec));
             obj.data.totalCollisions = zeros(size(timeVec));
         end
         
@@ -56,9 +56,8 @@ classdef LEOModel
             end
             
             % update total debris
-            obj.data.totalDebris(tIdx) = obj.data.totalDebris(tIdx-1) + newDebris;
             obj.numDebris = obj.numDebris + newDebris;
-
+            obj.data.totalDebris(tIdx) = obj.numDebris;
             
         end
         
