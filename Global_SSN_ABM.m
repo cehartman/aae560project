@@ -67,12 +67,12 @@ for iNation = 1:n_nations
     
     sensors = 10;
     sensor_capability = 500;
-    sensor_request_rate = 0;%1*365/timeStep;
-    sensor_const_speed = 0;%3*365/timeStep;
+    sensor_request_rate = 1*365;
+    sensor_const_speed = 3*365/timeStep;
     sensor_mfg_cost = 0;
     sensor_ops_cost = 0;
     data_quality = 0;
-    gssn_member = randi([0 1]);
+    gssn_member = 0;%randi([0 1]);
     fuzz = 0;
     starting_budget = randi([50 80]);
     nsat = 160;
