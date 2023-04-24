@@ -12,6 +12,9 @@ classdef NationAgent
         sensor_con_speed
         sensor_manu_cost % per nation or same for all nations?
         sensor_oper_cost
+        sat_oper_cost
+        sat_proc_cost
+        sat_revenue
         gssn_member % bool
         fuzzing % bool
         tech_cap % technological capability (mean and std dev)
@@ -34,7 +37,7 @@ classdef NationAgent
     
     methods
         
-        function obj = NationAgent(timeVec,timeStep,id,sensors,sc,srr,scs,smc,soc,tc,gm,fuzz,gdp,nsat,lr)
+        function obj = NationAgent(timeVec,timeStep,id,sensors,sc,srr,scs,smc,soc,satoc,spc,sr,tc,gm,fuzz,gdp,nsat,lr)
             obj.timeVec = timeVec;
             obj.timeStep = timeStep;
             obj.id = id;
@@ -44,6 +47,9 @@ classdef NationAgent
             obj.sensor_con_speed = scs;
             obj.sensor_manu_cost = smc;
             obj.sensor_oper_cost = soc;
+            obj.sat_oper_cost = satoc;
+            obj.sat_proc_cost = spc;
+            obj.sat_revenue = sr;
             obj.tech_cap = tc;
             obj.sensor_data_quality = normrnd(tc(1),tc(2),1,sensors);
             obj.sensor_data_quality(obj.sensor_data_quality>1) = 1; %cap sensor data quality at 1
@@ -68,6 +74,9 @@ classdef NationAgent
             obj.data.totalSensors = ones(size(timeVec))*obj.n_sensors;
             obj.data.trackingCapacity = ones(size(timeVec))*obj.tracking_capacity;
             obj.data.totalSatellites = ones(size(timeVec))*obj.satellites;
+            obj.data.budget = zeros(size(timeVec));
+            obj.data.revenue = zeros(size(timeVec));
+            obj.data.cost = zeros(size(timeVec));
         end
         
         function obj = update(obj, t, total_objects, gssn_objects, fee, econParams)
@@ -116,12 +125,15 @@ classdef NationAgent
             obj = obj.launch_satellites(econParams);
             
             % update national costs and revenue
-            obj = obj.update_costs_and_revenue(econParams);
+            obj = obj.update_costs_and_revenue();
             
             % update data
             obj.data.totalSensors(tIdx) = obj.n_sensors;
             obj.data.trackingCapacity(tIdx) = obj.tracking_capacity;
             obj.data.totalSatellites(tIdx) = obj.satellites;
+            obj.data.budget(tIdx) = obj.budget;
+            obj.data.revenue(tIdx) = obj.revenue;
+            obj.data.cost(tIdx) = obj.total_cost;
 
         end
         
@@ -235,29 +247,33 @@ classdef NationAgent
             %take the budget, and add or subtract a percentage of the
             %budget based on standard normal distribution
 
-            obj.budget = obj.budget + obj.yearly_budget*normrnd(0,1); % TODO: decide on budget fluctuation
+            obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0,1); % TODO: decide on budget fluctuation
             obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
+            obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
+            obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;
+            obj.sat_proc_cost = obj.sat_proc_cost*econParams.inflation;
+            obj.sat_revenue = obj.sat_proc_cost*econParams.inflation;
 
 
 
         end
         
-        function obj = update_costs_and_revenue(obj,econParams)
+        function obj = update_costs_and_revenue(obj)
             % costs from sensor operation, satellite operation, revenue from
             % satellite operations. Manufacturing costs applied elsewhere.
             
             % sensor operation costs
-            currentSensOpCost = obj.n_sensors*econParams.sensorOpCost*obj.timeStep/365.2425;
+            currentSensOpCost = obj.n_sensors*obj.sensor_oper_cost*obj.timeStep/365.2425;
             obj.total_cost = obj.total_cost + currentSensOpCost;
             obj.budget = obj.budget - currentSensOpCost;
             
             % satellite operation costs
-            currentSatOpCost = obj.satellites*econParams.satOpCost*obj.timeStep/365.2425;
+            currentSatOpCost = obj.satellites*obj.sat_oper_cost*obj.timeStep/365.2425;
             obj.total_cost = obj.total_cost + currentSatOpCost;
             obj.budget = obj.budget - currentSatOpCost;
             
             % satellite operation revenue
-            currentSatRev = obj.satellites*econParams.satOpRev*obj.timeStep/365.2425;
+            currentSatRev = obj.satellites*obj.sat_revenue*obj.timeStep/365.2425;
             obj.revenue = obj.revenue + currentSatRev;
             obj.budget = obj.budget + currentSatRev;
         end

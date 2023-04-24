@@ -8,7 +8,7 @@
 % Surveillance Network (SSN) Agent Based Model (ABM) and evaluates output 
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear; close all; clc; rng('default');
+clear; close all; clc; rng(2);
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
 
 %TODO: remove this when we're ready
@@ -24,11 +24,11 @@ n_nations = 1;
 % Economics
 econParams.newSatCost = 171;    % million $ from OP
 econParams.satOpCost = 1;       % million $ / year from OP
-econParams.satOpRev = 279000/8261; % million $ / year
+econParams.satOpRev = 279000/8261; % million $ / year per sat
 econParams.newSensorCost = 1600; % million $ from Space Fence
 econParams.sensorOpCost = 6;    % million $ / year from $33m/5yrs5mo for SF
 econParams.inflation = 1.03; % assume 3% annually 
-nationalBudgetsRange = [50000 80000]; % million $
+nationalBudgetsRange = [10000 50000]; % million $
 
 % Time
 simTime = 100; % [years]
@@ -49,7 +49,7 @@ gssa_model = GlobalSSAModel(timeVec,timeStep,envParams);
 
 %Add GSSN object 
 %inputs: nn, no, dq, na, cost
-gssn = GSSNObject(0, 0, 0, {}, 50);
+gssn = GSSNObject(0, 0, 0, {}, 1000);
 
 gssa_model = gssa_model.add_gssn(gssn);
 
@@ -79,18 +79,22 @@ for iNation = 1:n_nations
     sensor_capability = 500;
     sensor_request_rate = 1*365;
     sensor_const_speed = 3*365/timeStep; % make variable per nation?
-    sensor_mfg_cost = econParams.newSensorCost; % make variable per nation
-    sensor_ops_cost = 0; % make fixed per nation?
+    sensor_mfg_cost = econParams.newSensorCost; % make variable per nation?
+    sensor_ops_cost = econParams.sensorOpCost; % make fixed or variable per nation?
+    sat_ops_cost = econParams.satOpCost;
+    sat_revenue = econParams.satOpRev;
+    sat_proc_cost = econParams.newSatCost;
     tech_cap = [1 0.2]; % mean stddev
     gssn_member = 0;%randi([0 1]);
     fuzz = 0;
     starting_budget = randi(nationalBudgetsRange);
     nsat = 160; % TODO: make random
-    launch_rate = 70.5/365.2425*timeStep; % TODO: based on what?
+    launch_rate = 70.5/365.2425*timeStep; % TODO: based on what? I.e., do we want to move away from random sampling?
 
     newNation = NationAgent(timeVec, timeStep, iNation, sensors,...
         sensor_capability, sensor_request_rate, sensor_const_speed,...
-        sensor_mfg_cost, sensor_ops_cost, tech_cap,...
+        sensor_mfg_cost, sensor_ops_cost, sat_ops_cost, sat_proc_cost, ...
+        sat_revenue, tech_cap, ...
         gssn_member, fuzz, starting_budget, nsat, launch_rate);
 
     gssa_model = gssa_model.add_nation(newNation); % supply inputs 
