@@ -14,7 +14,6 @@ classdef NationAgent
         sensor_oper_cost
         gssn_member % bool
         fuzzing % bool
-        economic_conditions
         tech_cap % technological capability (mean and std dev)
         sensor_data_quality %array of sensor data qualities
         nation_data_quality %nation data quality (avg of sensor data qualities)
@@ -25,10 +24,11 @@ classdef NationAgent
         wait_con
         want_gssn %bool
         budget
+        yearly_budget
         satellites
         launch_rate
         data
-        econUpdates
+        econ_updates
      
     end
     
@@ -59,9 +59,10 @@ classdef NationAgent
             obj.last_sensor_request = 0;
             obj.want_gssn = gm;
             obj.budget = gdp;
+            obj.yearly_budget = gdp;
             obj.satellites = nsat;
             obj.launch_rate = lr;
-            obj.econUpdates = 0;
+            obj.econ_updates = 0;
             
             % initialize data for analysis
             obj.data.totalSensors = ones(size(timeVec))*obj.n_sensors;
@@ -75,8 +76,8 @@ classdef NationAgent
             tIdx = t/obj.timeStep+1;
             
             % possibly update economic conditions (only performed annually)
-            if mod(t,365.2425) < 8
-                obj.econUpdates = obj.econUpdates + 1;
+            if mod(t,365.2425) < obj.timeStep
+                obj.econ_updates = obj.econ_updates + 1;
                 obj = obj.update_economic_conditions(econParams);
             end
             
@@ -135,7 +136,7 @@ classdef NationAgent
             %the agent is the number of gssn objects being tracked
             
             if obj.gssn_member == 1
-                total_tracked = gssn_objects;
+                total_tracked = max(gssn_objects,obj.tracking_capacity);
             else
                 total_tracked = obj.tracking_capacity;
             end
@@ -165,6 +166,7 @@ classdef NationAgent
             %the total cost, and increment the number of sensors
             elseif obj.wait_con >= obj.sensor_con_speed
                 obj.total_cost = obj.total_cost + obj.sensor_manu_cost;
+                obj.budget = obj.budget - obj.sensor_manu_cost;
                 obj.n_sensors = obj.n_sensors + 1;
                 
                 %add sensor with a random data quality
@@ -211,6 +213,7 @@ classdef NationAgent
 
                 %TODO: Add economics logic
             end
+            %TODO: do we ever want nations to choose to leave the GSSN?
 
         end
         
@@ -226,12 +229,13 @@ classdef NationAgent
             % variables like sensor manufacturing and operating costs and 
             % sensor addition timeline."
             
+            % updates annually, not each timestep
 
             %simulates random fluctuations in the nations budget
             %take the budget, and add or subtract a percentage of the
             %budget based on standard normal distribution
 
-            obj.budget = obj.budget + obj.budget; %*normrnd(0,1); TODO: decide on budget fluctuation
+            obj.budget = obj.budget + obj.yearly_budget*normrnd(0,1); % TODO: decide on budget fluctuation
             obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
 
 
@@ -247,7 +251,7 @@ classdef NationAgent
             obj.total_cost = obj.total_cost + currentSensOpCost;
             obj.budget = obj.budget - currentSensOpCost;
             
-            % satelite operation costs
+            % satellite operation costs
             currentSatOpCost = obj.satellites*econParams.satOpCost*obj.timeStep/365.2425;
             obj.total_cost = obj.total_cost + currentSatOpCost;
             obj.budget = obj.budget - currentSatOpCost;
