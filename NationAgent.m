@@ -29,6 +29,8 @@ classdef NationAgent
         budget
         yearly_budget
         satellites
+        sat_life
+        sat_retire
         launch_rate
         data
         econ_updates
@@ -37,7 +39,7 @@ classdef NationAgent
     
     methods
         
-        function obj = NationAgent(timeVec,timeStep,id,sensors,sc,srr,scs,smc,soc,satoc,spc,sr,tc,gm,fuzz,gdp,nsat,lr)
+        function obj = NationAgent(timeVec,timeStep,id,sensors,sc,srr,scs,smc,soc,satoc,spc,sr,tc,gm,fuzz,gdp,nsat,sat_life,lr)
             obj.timeVec = timeVec;
             obj.timeStep = timeStep;
             obj.id = id;
@@ -67,6 +69,8 @@ classdef NationAgent
             obj.budget = gdp;
             obj.yearly_budget = gdp;
             obj.satellites = nsat;
+            obj.sat_life = sat_life;
+            obj.sat_retire = obj.timeVec(1) + rand(1,obj.satellites)*obj.sat_life; %random sample uniformly between 0 and max sat life
             obj.launch_rate = lr;
             obj.econ_updates = 0;
             
@@ -121,8 +125,8 @@ classdef NationAgent
             %update tracking capacity
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
 
-            % launch satellite(s) (maybe)
-            obj = obj.launch_satellites(econParams);
+            % launch and retire satellite(s) (maybe)
+            obj = obj.update_satellites(t,econParams);
             
             % update national costs and revenue
             obj = obj.update_costs_and_revenue();
@@ -278,21 +282,32 @@ classdef NationAgent
             obj.budget = obj.budget + currentSatRev;
         end
         
-        function obj = launch_satellites(obj,econParams)
+        function obj = update_satellites(obj,t,econParams)
+            % launch/de-orbit satellites
             %TODO: what economic considerations determine when satellites are launched?
+
             launchEvents = round(normrnd(obj.launch_rate,0.5));
             if launchEvents < 0
                launchEvents = 0; 
             end
+
             remainingLaunches = launchEvents;
             while remainingLaunches > 0
                 if obj.budget > econParams.newSatCost
                     obj.satellites = obj.satellites + 1;
+                    obj.sat_retire(end+1) = obj.sat_life + t;
                     obj.total_cost = obj.total_cost + econParams.newSatCost;
                     obj.budget = obj.budget - econParams.newSatCost;
                 end
                 remainingLaunches = remainingLaunches-1;
             end
+
+            % retire satellites
+            retireEventsIdx = t > obj.sat_retire;
+            retireEvents = sum(retireEventsIdx);
+            obj.satellites = obj.satellites - retireEvents;
+            obj.sat_retire(retireEventsIdx) = [];
+
         end
         
     end

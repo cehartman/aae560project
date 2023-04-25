@@ -21,6 +21,7 @@ classdef LEOModel
             
             % initialize debris/collisions storage data
             obj.data.totalDebris = zeros(size(timeVec));
+            obj.data.totalDebris(1) = obj.numDebris;
             obj.data.totalCollisions = zeros(size(timeVec));
         end
         

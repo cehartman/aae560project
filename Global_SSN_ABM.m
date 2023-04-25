@@ -8,7 +8,7 @@
 % Surveillance Network (SSN) Agent Based Model (ABM) and evaluates output 
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear; close all; clc; rng(2);
+clear; close all; clc; rng(3);
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
 
 %TODO: remove this when we're ready
@@ -77,25 +77,26 @@ for iNation = 1:n_nations
     
     sensors = 10;
     sensor_capability = 500;
-    sensor_request_rate = 1*365;
-    sensor_const_speed = 3*365/timeStep; % make variable per nation?
+    sensor_request_rate = 1*365.2425; % days
+    sensor_const_speed = 3*365.2425/timeStep; % time steps % make variable per nation?
     sensor_mfg_cost = econParams.newSensorCost; % make variable per nation?
     sensor_ops_cost = econParams.sensorOpCost; % make fixed or variable per nation?
     sat_ops_cost = econParams.satOpCost;
     sat_revenue = econParams.satOpRev;
     sat_proc_cost = econParams.newSatCost;
-    tech_cap = [1 0.2]; % mean stddev
+    tech_cap = [1 0]; % [mean stddev]
     gssn_member = 0;%randi([0 1]);
     fuzz = 0;
     starting_budget = randi(nationalBudgetsRange);
     nsat = 160; % TODO: make random
+    sat_life = 8*365.2425; % days
     launch_rate = 70.5/365.2425*timeStep; % TODO: based on what? I.e., do we want to move away from random sampling?
 
     newNation = NationAgent(timeVec, timeStep, iNation, sensors,...
         sensor_capability, sensor_request_rate, sensor_const_speed,...
         sensor_mfg_cost, sensor_ops_cost, sat_ops_cost, sat_proc_cost, ...
-        sat_revenue, tech_cap, ...
-        gssn_member, fuzz, starting_budget, nsat, launch_rate);
+        sat_revenue, tech_cap, gssn_member, fuzz, starting_budget, nsat, ...
+        sat_life, launch_rate);
 
     gssa_model = gssa_model.add_nation(newNation); % supply inputs 
 
