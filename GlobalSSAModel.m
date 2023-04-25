@@ -47,7 +47,7 @@ classdef GlobalSSAModel
         end
 
 
-        function obj = timestep(obj,t)
+        function obj = timestep(obj,t,econParams)
             global enable_environment_updates
             global environment_updates_only
             % commands the model to advance a time step
@@ -65,7 +65,7 @@ classdef GlobalSSAModel
                 %STEP 2: Update Nation Preferences
                 for i = 1:obj.n_nations
                     obj.nations{i} = obj.nations{i}.update(t, total_objects,...
-                        obj.gssn.num_objects, obj.gssn.fee);
+                        obj.gssn.num_objects, obj.gssn.fee, econParams);
                 end
                 
                 %STEP 3: Collect nations that want to be in the GSSN but are
