@@ -67,3 +67,33 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 1.5];
 xlabel('Time (Years)','FontWeight','Bold');
 title('Tracking Success Probability');
 ylabel('Tracking Success Probability','FontWeight','Bold');
+
+% Total Budget
+figure('Color','w'); hold on; box on; grid on;
+for iNation = 1:length(gssa_model.nations)
+    plot(xData,gssa_model.nations{iNation}.data.budget);
+end
+ax = gca; ax.XLim = round([xData(1) xData(end)]);
+xlabel('Time (Years)','FontWeight','Bold');
+title('Budget');
+ylabel('$ (Millions)','FontWeight','Bold');
+
+% Total Revenue
+figure('Color','w'); hold on; box on; grid on;
+for iNation = 1:length(gssa_model.nations)
+    plot(xData,gssa_model.nations{iNation}.data.revenue);
+end
+ax = gca; ax.XLim = round([xData(1) xData(end)]);
+xlabel('Time (Years)','FontWeight','Bold');
+title('Revenue');
+ylabel('$ (Millions)','FontWeight','Bold');
+
+% Total Cost
+figure('Color','w'); hold on; box on; grid on;
+for iNation = 1:length(gssa_model.nations)
+    plot(xData,gssa_model.nations{iNation}.data.cost);
+end
+ax = gca; ax.XLim = round([xData(1) xData(end)]);
+xlabel('Time (Years)','FontWeight','Bold');
+title('Cost');
+ylabel('$ (Millions)','FontWeight','Bold');
