@@ -67,21 +67,22 @@ for iNation = 1:n_nations
     
     sensors = 10;
     sensor_capability = 500;
-    sensor_request_rate = 1*365;
-    sensor_const_speed = 3*365/timeStep;
+    sensor_request_rate = 1*365.2425;
+    sensor_const_speed = 3*365.2425/timeStep;
     sensor_mfg_cost = 0;
     sensor_ops_cost = 0;
-    tech_cap = [1 0.2]; % mean stddev
+    tech_cap = [1 0]; % mean stddev
     gssn_member = 0;%randi([0 1]);
     fuzz = 0;
     starting_budget = randi([50 80]);
     nsat = 160;
+    sat_life = 8*365.2425; % years
     launch_rate = 70.5/365.2425*timeStep;
 
     newNation = NationAgent(timeVec, timeStep, iNation, sensors,...
         sensor_capability, sensor_request_rate, sensor_const_speed,...
         sensor_mfg_cost, sensor_ops_cost, tech_cap,...
-        gssn_member, fuzz, starting_budget, nsat, launch_rate);
+        gssn_member, fuzz, starting_budget, nsat, sat_life, launch_rate);
 
     gssa_model = gssa_model.add_nation(newNation); % supply inputs 
 
@@ -100,7 +101,7 @@ total_members = [];
 
 % Start Simulation Steps
 H = waitbar(0/timeVec(end),'Progress:');
-for t = timeVec(1:end)
+for t = timeVec(2:end)
     
     % perform the next model step
     gssa_model = gssa_model.timestep(t);
