@@ -26,6 +26,8 @@ classdef NationAgent
         want_gssn %bool
         budget
         satellites
+        sat_life
+        sat_retire
         launch_rate
         data
      
@@ -33,7 +35,7 @@ classdef NationAgent
     
     methods
         
-        function obj = NationAgent(timeVec,timeStep,id,sensors,sc,srr,scs,smc,soc,tc,gm,fuzz,gdp,nsat,lr)
+        function obj = NationAgent(timeVec,timeStep,id,sensors,sc,srr,scs,smc,soc,tc,gm,fuzz,gdp,nsat,sat_life,lr)
             obj.timeVec = timeVec;
             obj.timeStep = timeStep;
             obj.id = id;
@@ -59,6 +61,8 @@ classdef NationAgent
             obj.want_gssn = gm;
             obj.budget = gdp;
             obj.satellites = nsat;
+            obj.sat_life = sat_life;
+            obj.sat_retire = ones(1,obj.satellites)*(obj.sat_life + timeVec(1));
             obj.launch_rate = lr;
             
             % initialize data for analysis
@@ -105,8 +109,8 @@ classdef NationAgent
             %update economic conditions
             obj = obj.update_economic_conditions();
             
-            % launch satellite(s) (maybe)
-            obj = obj.launch_satellites();
+            % launch and retire satellite(s) (maybe)
+            obj = obj.update_satellites(t);
             
             % update data
             obj.data.totalSensors(tIdx) = obj.n_sensors;
@@ -234,12 +238,21 @@ classdef NationAgent
             % successful space operations
         end
         
-        function obj = launch_satellites(obj)
+        function obj = update_satellites(obj,t)
+            % launch satellites
             launchEvents = round(normrnd(obj.launch_rate,0.5));
             if launchEvents < 0
                launchEvents = 0; 
             end
             obj.satellites = obj.satellites + launchEvents;
+            if launchEvents > 0
+                obj.sat_retire(end+1:end+launchEvents) = obj.sat_life + t;
+            end
+            % retire satellites
+            retireEventsIdx = t > obj.sat_retire;
+            retireEvents = sum(retireEventsIdx);
+            obj.satellites = obj.satellites - retireEvents;
+            obj.sat_retire(retireEventsIdx) = [];
         end
         
     end
