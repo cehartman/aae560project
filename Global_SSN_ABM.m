@@ -67,16 +67,16 @@ for iNation = 1:n_nations
     
     sensors = 10;
     sensor_capability = 500;
-    sensor_request_rate = 1*365.2425;
-    sensor_const_speed = 3*365.2425/timeStep;
+    sensor_request_rate = 1*365.2425; % days
+    sensor_const_speed = 3*365.2425/timeStep; % time steps
     sensor_mfg_cost = 0;
     sensor_ops_cost = 0;
-    tech_cap = [1 0]; % mean stddev
+    tech_cap = [1 0]; % [mean stddev]
     gssn_member = 0;%randi([0 1]);
     fuzz = 0;
     starting_budget = randi([50 80]);
     nsat = 160;
-    sat_life = 8*365.2425; % years
+    sat_life = 8*365.2425; % days
     launch_rate = 70.5/365.2425*timeStep;
 
     newNation = NationAgent(timeVec, timeStep, iNation, sensors,...
