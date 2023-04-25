@@ -186,7 +186,6 @@ classdef NationAgent
             if obj.need_sensor == 1 && obj.gssn_member == 0
 
                 %simple check, could add complexity here
- %%%%%%%%%%MANUFACTURING COST OR OPERATION COST?%%%%%%%%%%%%%%%%%%
 
                 %if it's cheaper to mfg a sensor vs joining gssn, nation
                 %will choose to make its own

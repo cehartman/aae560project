@@ -8,7 +8,7 @@ classdef GSSNObject
         num_nations
         num_objects
         nations
-        data_quality
+        min_data_quality %this is an input to test our hypothesis
         fee
         decision
         
@@ -19,9 +19,10 @@ classdef GSSNObject
         function obj = GSSNObject(nn, no, dq, na, cost)
             obj.num_nations = nn;
             obj.num_objects = no; %move this to an update 
-            obj.data_quality = dq;
+            obj.min_data_quality = dq;
             obj.nations = na; 
             obj.fee = cost;
+            obj.decision = [];
 
         end
         
@@ -37,20 +38,34 @@ classdef GSSNObject
         end
         
         
+        function obj = evaluate(obj,nation)
+            
+            %check if nations average data quality is greater than or equal
+            %to the minimum data quality required by the GSSN
 
-        %adds a nation to the GSSN
+            if nation.nation_data_quality >= obj.min_data_quality
+                obj.decision = 1;
+            else
+                obj.decision = 0;
+            end
+
+
+        end
+        
         function obj = add_nation(obj,nation)
-            %increment 
+
+            %look at the data quality of a nation, and compare it to the
+            %input data quality
+
+            obj.decision = 1; %gssn will let nation in
+
+            %increment
             obj.num_nations = obj.num_nations + 1;
 
             %add nation to the end of the list
             obj.nations{1,end+1} = nation;
 
             obj.num_objects = obj.num_objects + nation.tracking_capacity;
-
-           
-
-            %TODO: Increment data quality ?
 
         end
 
