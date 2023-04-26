@@ -16,13 +16,15 @@ classdef GSSNObject
     end
 
     methods
-        function obj = GSSNObject(nn, no, dq, na, cost)
+        function obj = GSSNObject(nn, ~, dq, na, cost)
             obj.num_nations = nn;
-            obj.num_objects = no; %move this to an update 
+            obj.num_objects = 0; 
             obj.min_data_quality = dq;
-            obj.nations = na; 
+            obj.nations = {}; 
             obj.fee = cost;
             obj.decision = [];
+            gssn_tracking = 0;
+
 
         end
         
@@ -57,8 +59,6 @@ classdef GSSNObject
             %look at the data quality of a nation, and compare it to the
             %input data quality
 
-            obj.decision = 1; %gssn will let nation in
-
             %increment
             obj.num_nations = obj.num_nations + 1;
 
@@ -89,19 +89,11 @@ classdef GSSNObject
 
         end
 
-
-        function obj = inorout(obj, nation)
-
-            
-            
-            
-
-        end
         
         function obj = update_dataquality(obj,members)
 
-              %TODO:Update data quality based on all the members in the GSSN  
-
+              
+        %unused, since data quality is fixed for a simulation and 
             
 
         end

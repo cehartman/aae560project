@@ -18,7 +18,7 @@ enable_environment_updates = 1;
 environment_updates_only = 0;
 
 % Initialize Adjustable Parameters
-n_nations = 1;
+n_nations = 150;
 
 
 % Economics
@@ -29,6 +29,7 @@ econParams.newSensorCost = 1600; % million $ from Space Fence
 econParams.sensorOpCost = 6;    % million $ / year from $33m/5yrs5mo for SF
 econParams.inflation = 1.03; % assume 3% annually 
 nationalBudgetsRange = [10000 50000]; % million $
+
 
 % Time
 simTime = 100; % [years]
@@ -49,11 +50,12 @@ gssa_model = GlobalSSAModel(timeVec,timeStep,envParams);
 
 %Add GSSN object 
 %inputs: nn, no, dq, na, cost
-gssn = GSSNObject(0, 0, 0, {}, 1000);
+gssn = GSSNObject(0, 0, 0, 0, 10);
 
 gssa_model = gssa_model.add_gssn(gssn);
 
 % Add nation agents
+members = {};
 for iNation = 1:n_nations
     % determine nation-specific properties (some may be fixed for all 
     % nations, others may be set according to random distributions to make 
@@ -75,7 +77,7 @@ for iNation = 1:n_nations
 %     starting_budget = randi(nationalBudgetsRange);
 %     nsat = 10;
     
-    sensors = 10;
+    sensors = 5;
     sensor_capability = 500;
     sensor_request_rate = 1*365.2425; % days
     sensor_const_speed = 3*365.2425/timeStep; % time steps % make variable per nation?
@@ -85,18 +87,22 @@ for iNation = 1:n_nations
     sat_revenue = econParams.satOpRev;
     sat_proc_cost = econParams.newSatCost;
     tech_cap = [1 0]; % [mean stddev]
-    gssn_member = 0;%randi([0 1]);
+    gssn_member = randi([0 1]);
     fuzz = 0;
     starting_budget = randi(nationalBudgetsRange);
-    nsat = 160; % TODO: make random
+    nsat = randi([50 160]); % TODO: make random
     sat_life = 8*365.2425; % days
     launch_rate = 70.5/365.2425*timeStep; % TODO: based on what? I.e., do we want to move away from random sampling?
+    
+
 
     newNation = NationAgent(timeVec, timeStep, iNation, sensors,...
         sensor_capability, sensor_request_rate, sensor_const_speed,...
         sensor_mfg_cost, sensor_ops_cost, sat_ops_cost, sat_proc_cost, ...
         sat_revenue, tech_cap, gssn_member, fuzz, starting_budget, nsat, ...
         sat_life, launch_rate);
+
+
 
     gssa_model = gssa_model.add_nation(newNation); % supply inputs 
 
@@ -105,6 +111,8 @@ for iNation = 1:n_nations
     end
  
 end
+
+
 
 % Create Variables for plotting
 total_members = [];

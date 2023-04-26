@@ -115,7 +115,7 @@ classdef NationAgent
             
 %             if obj.want_gssn == 0 && 
             if obj.need_sensor == 1 ...
-                    && obj.budget >= obj.sensor_manu_cost
+                    && obj.budget >= (obj.sensor_manu_cost + obj.sensor_oper_cost)
                 obj = obj.add_sensor();
                 if obj.wait_con == 0
                     disp(['Nation ' num2str(obj.id) ' added sensor at year ' num2str(years(days(t)))]);
@@ -279,6 +279,8 @@ classdef NationAgent
             currentSatRev = obj.satellites*obj.sat_revenue*obj.timeStep/365.2425;
             obj.revenue = obj.revenue + currentSatRev;
             obj.budget = obj.budget + currentSatRev;
+
+
         end
         
         function obj = update_satellites(obj,t,econParams)
@@ -286,17 +288,17 @@ classdef NationAgent
             %TODO: what economic considerations determine when satellites are launched?
 
             launchEvents = round(normrnd(obj.launch_rate,0.5));
-            if launchEvents < 0
+            if launchEvents < 0 
                launchEvents = 0; 
             end
 
             remainingLaunches = launchEvents;
             while remainingLaunches > 0
-                if obj.budget > econParams.newSatCost
+                if obj.budget > (obj.sat_proc_cost + obj.sat_oper_cost)
                     obj.satellites = obj.satellites + 1;
                     obj.sat_retire(end+1) = obj.sat_life + t;
-                    obj.total_cost = obj.total_cost + econParams.newSatCost;
-                    obj.budget = obj.budget - econParams.newSatCost;
+                    obj.total_cost = obj.total_cost + obj.sat_proc_cost;
+                    obj.budget = obj.budget - obj.sat_proc_cost;
                 end
                 remainingLaunches = remainingLaunches-1;
             end

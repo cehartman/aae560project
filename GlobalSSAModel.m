@@ -35,6 +35,7 @@ classdef GlobalSSAModel
         end
 
         function obj = add_to_gssn(obj, nation)
+            
             obj.gssn = obj.gssn.add_nation(nation);
             obj.n_members = obj.n_members + 1;
 
