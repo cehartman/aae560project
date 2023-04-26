@@ -8,7 +8,7 @@ classdef GSSNObject
         num_nations
         num_objects
         nations
-        data_quality
+        min_data_quality %this is an input to test our hypothesis
         fee
         decision
         
@@ -16,12 +16,15 @@ classdef GSSNObject
     end
 
     methods
-        function obj = GSSNObject(nn, no, dq, na, cost)
+        function obj = GSSNObject(nn, dq, cost)
             obj.num_nations = nn;
-            obj.num_objects = no; %move this to an update 
-            obj.data_quality = dq;
-            obj.nations = na; 
+            obj.num_objects = 0; 
+            obj.min_data_quality = dq;
+            obj.nations = {}; 
             obj.fee = cost;
+            obj.decision = [];
+           
+
 
         end
         
@@ -37,20 +40,32 @@ classdef GSSNObject
         end
         
         
+        function [obj, decision] = evaluate(obj,nation)
+            
+            %check if nations average data quality is greater than or equal
+            %to the minimum data quality required by the GSSN
 
-        %adds a nation to the GSSN
+            if nation.nation_data_quality >= obj.min_data_quality
+                decision = 1;
+            else
+                decision= 0;
+            end
+
+
+        end
+        
         function obj = add_nation(obj,nation)
-            %increment 
+
+            %look at the data quality of a nation, and compare it to the
+            %input data quality
+
+            %increment
             obj.num_nations = obj.num_nations + 1;
 
             %add nation to the end of the list
             obj.nations{1,end+1} = nation;
 
             obj.num_objects = obj.num_objects + nation.tracking_capacity;
-
-           
-
-            %TODO: Increment data quality ?
 
         end
 
@@ -74,19 +89,11 @@ classdef GSSNObject
 
         end
 
-
-        function obj = inorout(obj, nation)
-
-            
-            
-            
-
-        end
         
         function obj = update_dataquality(obj,members)
 
-              %TODO:Update data quality based on all the members in the GSSN  
-
+              
+        %unused, since data quality is fixed for a simulation and 
             
 
         end
