@@ -43,16 +43,17 @@ classdef LEOModel
                 collisionOccurred = obj.DetermineCollision(nations{iNat});
                 
                 % Loop through satellites for current nation
-                numLostSat = 0;
+                satLost = false(1,nations{iNat}.satellites);
                 for ss = 1:nations{iNat}.satellites
                     if collisionOccurred(ss)
                         obj.data.totalCollisions(tIdx) = obj.data.totalCollisions(tIdx) + 1;
                         newDebris = newDebris + obj.params.numCollisionDebris;
-                        numLostSat = numLostSat + 1;
+                        satLost(ss) = true;
                     end
                 end
                 % Update number of satellites for current nation
-                nations{iNat}.satellites = nations{iNat}.satellites - numLostSat;
+                nations{iNat}.satellites = nations{iNat}.satellites - sum(satLost);
+                nations{iNat}.sat_retire(satLost) = [];
                 
             end
             
