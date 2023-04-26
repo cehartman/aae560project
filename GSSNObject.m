@@ -16,14 +16,14 @@ classdef GSSNObject
     end
 
     methods
-        function obj = GSSNObject(nn, ~, dq, na, cost)
+        function obj = GSSNObject(nn, dq, cost)
             obj.num_nations = nn;
             obj.num_objects = 0; 
             obj.min_data_quality = dq;
             obj.nations = {}; 
             obj.fee = cost;
             obj.decision = [];
-            gssn_tracking = 0;
+           
 
 
         end
@@ -40,15 +40,15 @@ classdef GSSNObject
         end
         
         
-        function obj = evaluate(obj,nation)
+        function [obj, decision] = evaluate(obj,nation)
             
             %check if nations average data quality is greater than or equal
             %to the minimum data quality required by the GSSN
 
             if nation.nation_data_quality >= obj.min_data_quality
-                obj.decision = 1;
+                decision = 1;
             else
-                obj.decision = 0;
+                decision= 0;
             end
 
 

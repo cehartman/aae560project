@@ -126,7 +126,7 @@ classdef NationAgent
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
 
             % launch and retire satellite(s) (maybe)
-            obj = obj.update_satellites(t,econParams);
+            obj = obj.update_satellites(t);
             
             % update national costs and revenue
             obj = obj.update_costs_and_revenue();
@@ -249,7 +249,8 @@ classdef NationAgent
             %simulates random fluctuations in the nations budget
             %take the budget, and add or subtract a percentage of the
             %budget based on standard normal distribution
-
+            %econParams.inflation = normrnd(1.03, 0.05);
+            
             obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0,1); % TODO: decide on budget fluctuation
             obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
             obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
@@ -283,7 +284,7 @@ classdef NationAgent
 
         end
         
-        function obj = update_satellites(obj,t,econParams)
+        function obj = update_satellites(obj,t)
             % launch/de-orbit satellites
             %TODO: what economic considerations determine when satellites are launched?
 

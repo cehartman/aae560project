@@ -35,7 +35,7 @@ classdef GlobalSSAModel
         end
 
         function obj = add_to_gssn(obj, nation)
-            
+
             obj.gssn = obj.gssn.add_nation(nation);
             obj.n_members = obj.n_members + 1;
 
@@ -47,9 +47,9 @@ classdef GlobalSSAModel
 
         end
         
-        function obj = eval_nation(obj, nation)
+        function [obj, decision] = eval_nation(obj, nation)
 
-            obj.gssn = obj.gssn.evaluate(nation);
+            [obj.gssn, decision] = obj.gssn.evaluate(nation);
 
         end
 
@@ -106,9 +106,9 @@ classdef GlobalSSAModel
                 if candidate_index ~=0
                     for i = 1:length(candidate_index)
 
-                        obj = obj.eval_nation(obj.nations{1,candidate_index(i)});
+                        [obj, decision] = obj.eval_nation(obj.nations{1,candidate_index(i)});
 
-                        if obj.gssn.decision == 1
+                        if decision == 1
                             obj = obj.add_to_gssn(obj.nations{1,candidate_index(i)});
                             obj.nations{1,candidate_index(i)}.gssn_member = 1;
 
@@ -130,7 +130,7 @@ classdef GlobalSSAModel
 
 
                 %gssn increases fee
-                obj.gssn.fee = obj.gssn.fee * 1.0002;
+                %obj.gssn.fee = obj.gssn.fee;
 
 
             end

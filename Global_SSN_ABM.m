@@ -49,8 +49,8 @@ timeVec  = 0:timeStep:timeEnd;    % Simulation time steps [days]
 gssa_model = GlobalSSAModel(timeVec,timeStep,envParams);
 
 %Add GSSN object 
-%inputs: nn, no, dq, na, cost
-gssn = GSSNObject(0, 0, 0, 0, 10);
+%inputs: nn, dq, cost
+gssn = GSSNObject(0,  0, 100);
 
 gssa_model = gssa_model.add_gssn(gssn);
 
