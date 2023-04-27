@@ -49,11 +49,9 @@ classdef LEOModel
                 % add debris from this nation's satellite collisions
                 newDebris = newDebris + obj.params.numCollisionDebris*newCollisions;
                 
-                
                 % Update number of satellites for current nation
                 nations{iNat}.satellites = nations{iNat}.satellites - newCollisions;
-                nations{iNat}.sat_retire(collisionOccurred) = [];
-                
+                nations{iNat}.sat_retire(collisionOccurred) = []; 
             end
             
             % update total debris
@@ -78,6 +76,7 @@ classdef LEOModel
             else % use nation's tracking capacity
                 trackingSuccessProb = nation.tracking_capacity/obj.numDebris;
             end
+            
             % if the random draw is above the tracking success probability,
             % or if the random draw is below the tracking success
             % probability but the 99% avoidance chance is failed, the

@@ -12,7 +12,6 @@ classdef GSSNObject
         fee
         decision
         
-
     end
 
     methods
@@ -23,9 +22,7 @@ classdef GSSNObject
             obj.nations = {}; 
             obj.fee = cost;
             obj.decision = [];
-           
-
-
+ 
         end
         
         function obj = update(obj)
@@ -50,7 +47,6 @@ classdef GSSNObject
                 decision= 0;
             end
 
-
         end
         
         function obj = add_nation(obj,nation)
@@ -70,15 +66,11 @@ classdef GSSNObject
 
         function obj = remove_nation(obj,nation)
 
-
             %delete the nation from the list
             obj.nations{nation.id} = {};
 
             %reduce number of nations by 1
             obj.num_nations = obj.num_nations - 1;
-
-            
-           
             obj.num_objects = obj.num_objects - nation.tracking_capacity;
             
             %TODO: update data quality

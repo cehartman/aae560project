@@ -122,16 +122,7 @@ classdef GlobalSSAModel
                 %update GSSN object
                 obj.gssn.update();
 
-                
-
-
-
-
-
             end
-
-            
-            
         end
     end
 end
