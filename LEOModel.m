@@ -25,7 +25,7 @@ classdef LEOModel
             obj.data.totalCollisions = zeros(size(timeVec));
         end
         
-        function [obj,nations] = update(obj,t,nations)
+        function [obj,nations] = update(obj,t,nations,gssn)
             
             % determine storage array index from current sim time
             tIdx = t/obj.timeStep+1;
@@ -40,21 +40,18 @@ classdef LEOModel
                 
                 % determine whether any of their satellites experience a 
                 % collision with debris
-                collisionOccurred = obj.DetermineCollision(nations{iNat});
+                collisionOccurred = obj.DetermineCollision(nations{iNat},gssn);
                 
-                % Loop through satellites for current nation
-                satLost = false(1,nations{iNat}.satellites);
-                for ss = 1:nations{iNat}.satellites
-                    if collisionOccurred(ss)
-                        obj.data.totalCollisions(tIdx) = obj.data.totalCollisions(tIdx) + 1;
-                        newDebris = newDebris + obj.params.numCollisionDebris;
-                        satLost(ss) = true;
-                    end
-                end
+                % update total collisions data storage
+                newCollisions = sum(collisionOccurred);
+                obj.data.totalCollisions(tIdx) = obj.data.totalCollisions(tIdx) + newCollisions;
+                
+                % add debris from this nation's satellite collisions
+                newDebris = newDebris + obj.params.numCollisionDebris*newCollisions;
+                
                 % Update number of satellites for current nation
-                nations{iNat}.satellites = nations{iNat}.satellites - sum(satLost);
-                nations{iNat}.sat_retire(satLost) = [];
-                
+                nations{iNat}.satellites = nations{iNat}.satellites - newCollisions;
+                nations{iNat}.sat_retire(collisionOccurred) = []; 
             end
             
             % update total debris
@@ -67,14 +64,18 @@ classdef LEOModel
             obj.SPD = obj.numDebris / obj.params.leoVol;
         end
 
-        function collisionOccurred = DetermineCollision(obj,nation)
+        function collisionOccurred = DetermineCollision(obj,nation,gssn)
             % Compute Mean Number of Collisions
             c = obj.SPD*obj.params.Asat*obj.params.vRel*obj.timeStep*86400;
             numPossibleCollisions = poissrnd(c,nation.satellites,1);
             
             % Determine probability of successfully tracking object that
             % would cause collision
-            trackingSuccessProb = nation.tracking_capacity/obj.numDebris; % TODO: determine whether we should model sat-sat collisions
+            if nation.gssn_member % use GSSN tracking capacity
+                trackingSuccessProb = gssn.num_objects/obj.numDebris;
+            else % use nation's tracking capacity
+                trackingSuccessProb = nation.tracking_capacity/obj.numDebris;
+            end
             
             % if the random draw is above the tracking success probability,
             % or if the random draw is below the tracking success
@@ -82,8 +83,8 @@ classdef LEOModel
             % possible collision does occur
             trackSuccessDraw = rand(size(numPossibleCollisions));
             avoidanceDraw = rand(size(numPossibleCollisions));
-            collisionOccurred = numPossibleCollisions > 0 & ((trackSuccessDraw >= trackingSuccessProb) ...
-                | (trackSuccessDraw < trackingSuccessProb & avoidanceDraw > 0.99));
+            collisionOccurred = numPossibleCollisions > 0 & ((trackSuccessDraw > trackingSuccessProb) ...
+                | (trackSuccessDraw <= trackingSuccessProb & avoidanceDraw > 0.99));
  
         end
         

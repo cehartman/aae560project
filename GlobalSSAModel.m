@@ -67,7 +67,7 @@ classdef GlobalSSAModel
             if enable_environment_updates % TODO: remove
 
                 %STEP 1: Update Environment
-                [obj.leo_environment,obj.nations] = obj.leo_environment.update(t,obj.nations);
+                [obj.leo_environment,obj.nations] = obj.leo_environment.update(t,obj.nations,obj.gssn);
                 total_objects = obj.leo_environment.numDebris;
             else
                 total_objects = 8000;
@@ -122,16 +122,7 @@ classdef GlobalSSAModel
                 %update GSSN object
                 obj.gssn.update();
 
-                
-
-
-
-
-
             end
-
-            
-            
         end
     end
 end

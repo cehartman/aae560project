@@ -142,11 +142,9 @@ classdef NationAgent
         end
         
         function obj = sensor_desire(obj, t, total_objects, gssn_objects)
-
             %this method requires input of the total number of objects in
             %the environment and updates the desire of the agent to build a
             %sensor or not
-            
 
             %if the agent is part of the gssn, total tracking capability of
             %the agent is the number of gssn objects being tracked
@@ -158,15 +156,12 @@ classdef NationAgent
             end
 
 
-            if total_tracked < 1.2 * total_objects
-
-                
+            if total_tracked < 1.2 * total_objects        
                 obj.need_sensor = 1;
                 obj.last_sensor_request = t;
             else
                 obj.need_sensor = 0;
             end
-
 
             %the agent has now expressed a desire for a new sensor or not
         end
@@ -227,10 +222,7 @@ classdef NationAgent
                 %part of the GSSN or not based on cost alone. Note this
                 %does not change anything if the agent is already part of
                 %the gssn
-
-                %TODO: Add economics logic
             end
-            %TODO: do we ever want nations to choose to leave the GSSN?
 
         end
         
@@ -251,7 +243,6 @@ classdef NationAgent
             %simulates random fluctuations in the nations budget
             %take the budget, and add or subtract a percentage of the
             %budget based on standard normal distribution
-            %econParams.inflation = normrnd(1.03, 0.05);
             
             obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0,1); % TODO: decide on budget fluctuation
             obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
@@ -260,9 +251,10 @@ classdef NationAgent
             obj.sat_proc_cost = obj.sat_proc_cost*econParams.inflation;
             obj.sat_revenue = obj.sat_proc_cost*econParams.inflation;
 
-            obj.sensor_data_quality = obj.sensor_data_quality *.95;
-
-
+            % Degrade DQ of all sensors yearly. One possible mechanism to
+            % incentivise nations to still build sensors even after joining
+            % GSSN.
+            obj.sensor_data_quality = obj.sensor_data_quality *0.95;
 
         end
         
@@ -297,11 +289,13 @@ classdef NationAgent
             % launch/de-orbit satellites
             %TODO: what economic considerations determine when satellites are launched?
 
+            % random draw to determine possible launches
             launchEvents = round(normrnd(obj.launch_rate,0.5));
-            if launchEvents < 0 || randi([0 1]) == 0
+            if launchEvents < 0 || randi([0 1]) == 0 % coin toss to prevent launches 50% of the time (may update this)
                launchEvents = 0; 
             end
 
+            % update budget and increase satellite count for each launch
             remainingLaunches = launchEvents;
             while remainingLaunches > 0
                 if obj.budget > (obj.sat_proc_cost + obj.sat_oper_cost)
@@ -313,7 +307,7 @@ classdef NationAgent
                 remainingLaunches = remainingLaunches-1;
             end
 
-            % retire satellites
+            % retire satellites that have orbited for their lifetime
             retireEventsIdx = t > obj.sat_retire;
             retireEvents = sum(retireEventsIdx);
             obj.satellites = obj.satellites - retireEvents;
