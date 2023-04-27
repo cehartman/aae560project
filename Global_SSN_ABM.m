@@ -77,7 +77,7 @@ for iNation = 1:n_nations
 %     starting_budget = randi(nationalBudgetsRange);
 %     nsat = 10;
     
-    sensors = 5;
+    sensors = 15;
     sensor_capability = 500;
     sensor_request_rate = 1*365.2425; % days
     sensor_const_speed = 3*365.2425/timeStep; % time steps % make variable per nation?

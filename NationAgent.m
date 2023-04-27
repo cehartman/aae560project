@@ -105,6 +105,13 @@ classdef NationAgent
             obj = obj.gssn_desire(fee);
            
 
+%             %nation_determines how many sensors it needs
+%             required_tracking = 1.2 * total_objects;
+% 
+%             num_sensors_reqd = required_tracking / obj.sensor_capability;
+% 
+%             num_sensors_reqd = ceil(num_sensors_reqd);
+
 
             %if the agent does not want to be part of the gssn but does 
             % want to add a sensor, and can afford it, 
@@ -159,6 +166,8 @@ classdef NationAgent
 
 
             if total_tracked < 1.2 * total_objects
+
+                
                 obj.need_sensor = 1;
                 obj.last_sensor_request = t;
             else
@@ -251,7 +260,7 @@ classdef NationAgent
             %budget based on standard normal distribution
             %econParams.inflation = normrnd(1.03, 0.05);
             
-            obj.budget = obj.budget + obj.yearly_budget*(econParams.inflation);%*normrnd(0,1); % TODO: decide on budget fluctuation
+            obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0,1); % TODO: decide on budget fluctuation
             obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
             obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
             obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;

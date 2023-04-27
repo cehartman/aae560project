@@ -129,8 +129,11 @@ classdef GlobalSSAModel
                 
 
 
-                %gssn increases fee
-                %obj.gssn.fee = obj.gssn.fee;
+                %update GSSN object
+                obj = obj.gssn.update();
+                
+
+
 
 
             end
