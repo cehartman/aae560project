@@ -13,7 +13,7 @@ plot(xData,gssa_model.leo_environment.data.totalDebris);
 for iNation = 1:length(gssa_model.nations)
     plot(xData,gssa_model.nations{iNation}.data.trackingCapacity);
 end
-ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 20000];
+ax = gca; ax.XLim = round([xData(1) xData(end)]);
 ax.YAxis.Exponent = 0;
 title('Tracking');
 xlabel('Time (Years)','FontWeight','Bold');
@@ -23,7 +23,7 @@ legend({'Debris','Tracking Capacity'});
 % Total Debris
 figure('Color','w'); hold on; box on; grid on;
 plot(xData,gssa_model.leo_environment.data.totalDebris);
-ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 20000];
+ax = gca; ax.XLim = round([xData(1) xData(end)]);
 ax.YAxis.Exponent = 0;
 title('Total Number of Debris');
 xlabel('Time (Years)','FontWeight','Bold');
