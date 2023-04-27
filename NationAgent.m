@@ -251,7 +251,7 @@ classdef NationAgent
             %budget based on standard normal distribution
             %econParams.inflation = normrnd(1.03, 0.05);
             
-            obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0,1); % TODO: decide on budget fluctuation
+            obj.budget = obj.budget + obj.yearly_budget*(econParams.inflation);%*normrnd(0,1); % TODO: decide on budget fluctuation
             obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
             obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
             obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;
@@ -289,7 +289,7 @@ classdef NationAgent
             %TODO: what economic considerations determine when satellites are launched?
 
             launchEvents = round(normrnd(obj.launch_rate,0.5));
-            if launchEvents < 0 
+            if launchEvents < 0 || randi([0 1]) == 0
                launchEvents = 0; 
             end
 
