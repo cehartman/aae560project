@@ -17,7 +17,7 @@ classdef GlobalSSAModel
             obj.n_nations = 0;
             obj.n_members = 0;
             obj.n_nonmembers = 0;
-            obj.n_members_cum = [];
+           
             
             % initialize LEO satellite/debris model
             obj.leo_environment = LEOModel(timeVec,timeStep,envParams);
