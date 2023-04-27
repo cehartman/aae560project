@@ -18,7 +18,7 @@ enable_environment_updates = 1;
 environment_updates_only = 0;
 
 % Initialize Adjustable Parameters
-n_nations = 150;
+n_nations = 20;
 
 
 % Economics
@@ -27,8 +27,8 @@ econParams.satOpCost = 1;       % million $ / year from OP
 econParams.satOpRev = 279000/8261; % million $ / year per sat
 econParams.newSensorCost = 1600; % million $ from Space Fence
 econParams.sensorOpCost = 6;    % million $ / year from $33m/5yrs5mo for SF
-econParams.inflation = 1.0; % assume 3% annually 
-nationalBudgetsRange = [10000 50000]; % million $
+econParams.inflation = 1.0; % negate inflation; not relevant to RQs
+nationalBudgetsRange = [1000 5000]; % million $
 
 
 % Time
@@ -50,7 +50,7 @@ gssa_model = GlobalSSAModel(timeVec,timeStep,envParams);
 
 %Add GSSN object 
 %inputs: nn, dq, cost
-gssn = GSSNObject(0,  0, 100);
+gssn = GSSNObject(0, 0.8, 2000);
 
 gssa_model = gssa_model.add_gssn(gssn);
 
@@ -66,18 +66,7 @@ for iNation = 1:n_nations
     %id,sensors,sc,scs,smc,soc,dq,gm,fuzz, gdp
     % TODO: maybe we should move these random sample ranges to adjustable 
     % parameters section
-%     sensors = randi([1 4]);
-%     sensor_capability = randi([10 1000]);
-%     sensor_const_speed = randi([1 5]);
-%     sensor_mfg_cost = randi([40 60]);
-%     sensor_ops_cost = randi([1 5]);
-%     data_quality = 0;
-%     gssn_member = randi([0 1]);
-%     fuzz = 0;
-%     starting_budget = randi(nationalBudgetsRange);
-%     nsat = 10;
-    
-    sensors = 5;
+    sensors = 10;
     sensor_capability = 500;
     sensor_request_rate = 1*365.2425; % days
     sensor_const_speed = 3*365.2425/timeStep; % time steps % make variable per nation?
@@ -86,7 +75,7 @@ for iNation = 1:n_nations
     sat_ops_cost = econParams.satOpCost;
     sat_revenue = econParams.satOpRev;
     sat_proc_cost = econParams.newSatCost;
-    tech_cap = [1 0]; % [mean stddev]
+    tech_cap = [.95 .05]; % [mean stddev]
     gssn_member = randi([0 1]);
     fuzz = 0;
     starting_budget = randi(nationalBudgetsRange);
@@ -94,28 +83,23 @@ for iNation = 1:n_nations
     sat_life = 8*365.2425; % days
     launch_rate = 70.5/365.2425*timeStep; % TODO: based on what? I.e., do we want to move away from random sampling?
     
-
-
     newNation = NationAgent(timeVec, timeStep, iNation, sensors,...
         sensor_capability, sensor_request_rate, sensor_const_speed,...
         sensor_mfg_cost, sensor_ops_cost, sat_ops_cost, sat_proc_cost, ...
         sat_revenue, tech_cap, gssn_member, fuzz, starting_budget, nsat, ...
         sat_life, launch_rate);
 
-
-
     gssa_model = gssa_model.add_nation(newNation); % supply inputs 
 
     if newNation.gssn_member == 1
-        gssa_model = gssa_model.add_to_gssn(newNation);
+        gssa_model = gssa_model.add_to_gssn(newNation, iNation);
     end
  
 end
 
 
-
 % Create Variables for plotting
-total_members = [];
+
 
 % Initialize storage arrays
 
@@ -123,22 +107,24 @@ total_members = [];
 
 % Start Simulation Steps
 H = waitbar(0/timeVec(end),'Progress:');
+ct = 0;
 for t = timeVec(2:end)
-    
+    ct = ct + 1;
     % perform the next model step
     gssa_model = gssa_model.timestep(t,econParams);
     % update waitbar
     waitbar(t/timeVec(end),H)
 
-%     figure(1)
-%     plot(t, gssa_model.n_members,'ko')
-%     hold on
+  
+    total_members_cum(ct) = gssa_model.n_members;
+   
 
 end
 waitbar(timeVec(end)/timeVec(end),H,'Simulation Complete!');
 
-% figure(1)
-% xlabel('Time Step')
-% ylabel('Number of Nations in GSSN')
+ figure(20)
+ plot(timeVec(2:end)/365.2425, total_members_cum)
+ xlabel('Time Step')
+ ylabel('Number of Nations in GSSN')
 
 [finalCollisions, finalDebris] = GlobalSSN_AnalysisPlots(gssa_model,timeVec);

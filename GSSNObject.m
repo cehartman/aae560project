@@ -28,8 +28,7 @@ classdef GSSNObject
 
         end
         
-        function obj = update(obj, agents)
-            obj.nations = agents;
+        function obj = update(obj)
 
             sum = 0;
             for i = 1:obj.num_nations
