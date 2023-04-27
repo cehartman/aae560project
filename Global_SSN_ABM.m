@@ -27,7 +27,7 @@ econParams.satOpCost = 1;       % million $ / year from OP
 econParams.satOpRev = 279000/8261; % million $ / year per sat
 econParams.newSensorCost = 1600; % million $ from Space Fence
 econParams.sensorOpCost = 6;    % million $ / year from $33m/5yrs5mo for SF
-econParams.inflation = 1.03; % assume 3% annually 
+econParams.inflation = 1.0; % assume 3% annually 
 nationalBudgetsRange = [10000 50000]; % million $
 
 
