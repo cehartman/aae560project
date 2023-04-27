@@ -97,3 +97,14 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]);
 xlabel('Time (Years)','FontWeight','Bold');
 title('Cost');
 ylabel('$ (Billions)','FontWeight','Bold');
+
+
+% GSSN Membership
+figure('Color','w'); hold on; box on; grid on;
+for iNation = 1:length(gssa_model.nations)
+    plot(xData,gssa_model.nations{iNation}.data.cost/1000);
+end
+ax = gca; ax.XLim = round([xData(1) xData(end)]);
+xlabel('Time (Years)','FontWeight','Bold');
+title('Cost');
+ylabel('$ (Billions)','FontWeight','Bold');

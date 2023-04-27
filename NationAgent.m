@@ -55,6 +55,7 @@ classdef NationAgent
             obj.tech_cap = tc;
             obj.sensor_data_quality = normrnd(tc(1),tc(2),1,sensors);
             obj.sensor_data_quality(obj.sensor_data_quality>1) = 1; %cap sensor data quality at 1
+            obj.sensor_data_quality(obj.sensor_data_quality<0) = 0; %No Negative data quality
             obj.nation_data_quality = mean(obj.sensor_data_quality);
             obj.sensor_tracking_capacity = sc*obj.sensor_data_quality;
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
@@ -105,14 +106,6 @@ classdef NationAgent
             obj = obj.gssn_desire(fee);
            
 
-%             %nation_determines how many sensors it needs
-%             required_tracking = 1.2 * total_objects;
-% 
-%             num_sensors_reqd = required_tracking / obj.sensor_capability;
-% 
-%             num_sensors_reqd = ceil(num_sensors_reqd);
-
-
             %if the agent does not want to be part of the gssn but does 
             % want to add a sensor, and can afford it, 
             % add (or continue adding) the sensor
@@ -136,7 +129,7 @@ classdef NationAgent
             obj = obj.update_satellites(t);
             
             % update national costs and revenue
-            obj = obj.update_costs_and_revenue();
+            obj = obj.update_costs_and_revenue(fee);
             
             % update data
             obj.data.totalSensors(tIdx) = obj.n_sensors;
@@ -267,14 +260,21 @@ classdef NationAgent
             obj.sat_proc_cost = obj.sat_proc_cost*econParams.inflation;
             obj.sat_revenue = obj.sat_proc_cost*econParams.inflation;
 
+            obj.sensor_data_quality = obj.sensor_data_quality *.95;
+
 
 
         end
         
-        function obj = update_costs_and_revenue(obj)
+        function obj = update_costs_and_revenue(obj, fee)
             % costs from sensor operation, satellite operation, revenue from
             % satellite operations. Manufacturing costs applied elsewhere.
             
+            if obj.gssn_member == 1
+                obj.budget = obj.budget - fee*obj.timeStep/365.2426;
+            end
+
+
             % sensor operation costs
             currentSensOpCost = obj.n_sensors*obj.sensor_oper_cost*obj.timeStep/365.2425;
             obj.total_cost = obj.total_cost + currentSensOpCost;

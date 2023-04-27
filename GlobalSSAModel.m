@@ -7,6 +7,7 @@ classdef GlobalSSAModel
         n_members
         n_nonmembers
         gssn 
+        n_members_cum
     end
     
     methods
@@ -16,6 +17,7 @@ classdef GlobalSSAModel
             obj.n_nations = 0;
             obj.n_members = 0;
             obj.n_nonmembers = 0;
+            obj.n_members_cum = [];
             
             % initialize LEO satellite/debris model
             obj.leo_environment = LEOModel(timeVec,timeStep,envParams);
@@ -34,15 +36,17 @@ classdef GlobalSSAModel
             obj.gssn = gssn_agent;
         end
 
-        function obj = add_to_gssn(obj, nation)
+        function obj = add_to_gssn(obj, nation,id)
 
             obj.gssn = obj.gssn.add_nation(nation);
+            obj.nations{1,id}.gssn_member = 1;
             obj.n_members = obj.n_members + 1;
 
         end
 
-        function obj = remove_from_gssn(obj, nation)
+        function obj = remove_from_gssn(obj, nation,id)
             obj.gssn = obj.gssn.remove_nation(nation);
+            obj.nations{1,id}.gssn_member = 0;
             obj.n_members = obj.n_members - 1;
 
         end
@@ -61,6 +65,7 @@ classdef GlobalSSAModel
             % commands the model to advance a time step
 
             if enable_environment_updates % TODO: remove
+
                 %STEP 1: Update Environment
                 [obj.leo_environment,obj.nations] = obj.leo_environment.update(t,obj.nations);
                 total_objects = obj.leo_environment.numDebris;
@@ -75,63 +80,50 @@ classdef GlobalSSAModel
                     obj.nations{i} = obj.nations{i}.update(t, total_objects,...
                         obj.gssn.num_objects, obj.gssn.fee, econParams);
                 end
-                
-                %STEP 3: Collect nations that want to be in the GSSN but are
-                %not currently for evaluation
-                ct = 0;
-                candidate_index = 0;
+
+
+                %STEP 3: If a nation is in the GSSN, make sure it's DQ is
+                %up to par still
+
                 for i = 1:obj.n_nations
-                    if obj.nations{1,i}.gssn_member == 0 &&...
-                            obj.nations{1,i}.want_gssn == 1
-                        ct = ct + 1;
-                        candidate_index(ct) = i;
-                        
-                    end
-                end
-                
-                %STEP 4: Collect Nations that want out of the GSSN
-                
-                want_out = 0;
-                ct = 0;
-                for i = 1:obj.n_nations
-                    if obj.nations{1,i}.gssn_member == 1 && obj.nations{1,i}.want_gssn == 0
-                        ct = ct + 1;
-                        want_out(ct) = i;
-                        
-                    end
-                end
-                
-                %STEP 5: evaluate each nation based on the quality of data
-                %relative to the minimum data quality required by the GSSN
-                if candidate_index ~=0
-                    for i = 1:length(candidate_index)
 
-                        [obj, decision] = obj.eval_nation(obj.nations{1,candidate_index(i)});
-
-                        if decision == 1
-                            obj = obj.add_to_gssn(obj.nations{1,candidate_index(i)});
-                            obj.nations{1,candidate_index(i)}.gssn_member = 1;
-
-                        else
-                        end
+                    [obj, decision] = obj.eval_nation(obj.nations{1,i});
+                    
+                    %if a nation wants to be in the gssn but isn't
+                    %currently, and the gssn will let them in, add them
+                    if obj.nations{1,i}.want_gssn == 1 && ...
+                            obj.nations{1,i}.gssn_member == 0 && ...
+                            decision == 1
+                        obj = obj.add_to_gssn(obj.nations{1,i}, i);
 
                     end
-                end
-                
-                %if nation wants out of GSSN, they can leave
-                if want_out ~=0
-                    for i = 1:length(want_out)
-                        obj = obj.remove_from_gssn(obj.nations{1,want_out(i)});
-                        
-                        obj.nations{1,want_out(i)}.gssn_member = 0;
+                    
+                    %if a nation wants out, let them out
+                    if obj.nations{1,i}.want_gssn == 0 &&...
+                            obj.nations{1,i}.gssn_member == 1
+                        obj = obj.remove_from_gssn(obj.nations{1,i}, i);
+                    end
+                    
+                    %if a nation wants to be a member, is currently a
+                    %member, but the GSSN rejects them, remove them
+                    if obj.nations{1,i}.gssn_member == 1 && ...
+                            obj.nations{1,i}.want_gssn == 1 &&...
+                            decision == 0
+                        obj = obj.remove_from_gssn(obj.nations{1,i}, i);
+                    end
+
+                    if obj.nations{1,i}.gssn_member == 1 && ...
+                            obj.nations{1,i}.want_gssn == 0 &&...
+                            decision == 0
+                        obj = obj.remove_from_gssn(obj.nations{1,i}, i);
                     end
                 end
-                
-
 
                 %update GSSN object
-                obj = obj.gssn.update();
+                obj.gssn.update();
+
                 
+
 
 
 
