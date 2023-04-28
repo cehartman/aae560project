@@ -18,17 +18,16 @@ enable_environment_updates = 1;
 environment_updates_only = 0;
 
 % Initialize Adjustable Parameters / Design Variables
-Global_SSN_ABM_Params;
-
-% Economics
-econParams = Global_SSN_ABM_EconParams;
+n_nations = 1;
+minGssnDQ = 0.8;
+gssnFee   = 2000; % million $ / year
 
 % Time
 simTime = 100; % [years]
 timeStep = 8; % [days]
 
-% Environment
-envParams = Global_SSN_ABM_LEOParams;
+% LEO Environment
+envParams = Global_SSN_ABM_LEOParams(timeStep);
 
 % Initialize Global SSA model
 timeEnd  = simTime*365.2425;      % Simulation end time [days]                                 
@@ -49,13 +48,17 @@ for iNation = 1:n_nations
     % diverse nations)
     
     % create nation and add to GSSA model
-    Global_SSN_ABM_NationParams;
+    [nationParams, econParams] = Global_SSN_ABM_NationParams(timeStep);
     
-    newNation = NationAgent(timeVec, timeStep, iNation, sensors,...
-        sensor_capability, sensor_request_rate, sensor_const_speed,...
-        sensor_mfg_cost, sensor_ops_cost, sat_ops_cost, sat_proc_cost, ...
-        sat_revenue, tech_cap, gssn_member, fuzz, starting_budget, nsat, ...
-        sat_life, launch_rate);
+    newNation = NationAgent(timeVec, timeStep, iNation, ...
+        nationParams.sensors, nationParams.sensor_capability, ...
+        nationParams.sensor_request_rate, nationParams.sensor_const_speed,...
+        nationParams.sensor_mfg_cost, nationParams.sensor_ops_cost, ...
+        nationParams.sat_ops_cost, nationParams.sat_proc_cost, ...
+        nationParams.sat_revenue, nationParams.tech_cap, ...
+        nationParams.gssn_member, nationParams.fuzz, ...
+        nationParams.starting_budget, nationParams.nsat, ...
+        nationParams.sat_life, nationParams.launch_rate);
 
     gssa_model = gssa_model.add_nation(newNation); % supply inputs 
 
