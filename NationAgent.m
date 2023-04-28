@@ -82,6 +82,8 @@ classdef NationAgent
             obj.data.budget = zeros(size(timeVec));
             obj.data.revenue = zeros(size(timeVec));
             obj.data.cost = zeros(size(timeVec));
+            obj.data.curSatOpCost = zeros(size(timeVec));
+            obj.data.curSatOpRev = zeros(size(timeVec));
         end
         
         function obj = update(obj, t, total_objects, gssn_objects, fee, econParams)
@@ -129,7 +131,7 @@ classdef NationAgent
             obj = obj.update_satellites(t);
             
             % update national costs and revenue
-            obj = obj.update_costs_and_revenue(fee);
+            obj = obj.update_costs_and_revenue(tIdx,fee);
             
             % update data
             obj.data.totalSensors(tIdx) = obj.n_sensors;
@@ -249,7 +251,7 @@ classdef NationAgent
             obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
             obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;
             obj.sat_proc_cost = obj.sat_proc_cost*econParams.inflation;
-            obj.sat_revenue = obj.sat_proc_cost*econParams.inflation;
+            obj.sat_revenue = obj.sat_revenue*econParams.inflation;
 
             % Degrade DQ of all sensors yearly. One possible mechanism to
             % incentivise nations to still build sensors even after joining
@@ -258,14 +260,13 @@ classdef NationAgent
 
         end
         
-        function obj = update_costs_and_revenue(obj, fee)
+        function obj = update_costs_and_revenue(obj, tIdx, fee)
             % costs from sensor operation, satellite operation, revenue from
             % satellite operations. Manufacturing costs applied elsewhere.
             
             if obj.gssn_member == 1
                 obj.budget = obj.budget - fee*obj.timeStep/365.2426;
             end
-
 
             % sensor operation costs
             currentSensOpCost = obj.n_sensors*obj.sensor_oper_cost*obj.timeStep/365.2425;
@@ -281,6 +282,10 @@ classdef NationAgent
             currentSatRev = obj.satellites*obj.sat_revenue*obj.timeStep/365.2425;
             obj.revenue = obj.revenue + currentSatRev;
             obj.budget = obj.budget + currentSatRev;
+            
+            % update data
+            obj.data.curSatOpCost(tIdx) = currentSatOpCost;
+            obj.data.curSatOpRev(tIdx) = currentSatRev;
 
 
         end
