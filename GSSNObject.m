@@ -29,19 +29,25 @@ classdef GSSNObject
             % initialize GSSN data storage
             obj.data.total_members_cum = zeros(1,length(timeVec));
             obj.data.total_members_cum(1) = nn;
+            obj.data.tracking_capacity = zeros(1,length(timeVec));
+            obj.data.combined_sensors = zeros(1,length(timeVec));
 
         end
         
         function obj = update(obj,t)
 
             sum = 0;
+            sumSens = 0;
             for i = 1:obj.num_nations
                 sum = sum + obj.nations{i}.tracking_capacity;
+                sumSens = sumSens + obj.nations{i}.n_sensors;
             end
 
             obj.num_objects = sum;
             
             obj.data.total_members_cum(t/obj.timeStep+1) = obj.num_nations;
+            obj.data.tracking_capacity(t/obj.timeStep+1) = sum;
+            obj.data.combined_sensors(t/obj.timeStep+1) = sumSens;
         end
         
         
