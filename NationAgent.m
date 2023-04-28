@@ -100,7 +100,8 @@ classdef NationAgent
             end
             
             % nation evaluates if it desires a new sensor
-            if obj.need_sensor == 0 || (t - obj.last_sensor_request) >= obj.sensor_request_rate
+            if obj.need_sensor == 0 || obj.collision_occurred || ...
+                    (t - obj.last_sensor_request) >= obj.sensor_request_rate
                 obj = obj.sensor_desire(t,total_objects,gssn_objects);
                 if obj.need_sensor == 1
                     disp(['Nation ' num2str(obj.id) ' requested sensor at year ' num2str(years(days(t)))]);
