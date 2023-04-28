@@ -108,8 +108,7 @@ classdef NationAgent
                 end
             end
 
-            obj = obj.gssn_desire(fee);
-           
+            obj = obj.gssn_desire(fee,total_objects);
 
             %if the agent does not want to be part of the gssn but does 
             % want to add a sensor, and can afford it, 
@@ -198,7 +197,7 @@ classdef NationAgent
 
         end
         
-        function obj = gssn_desire(obj, fee)
+        function obj = gssn_desire(obj, fee, total_objects)
             % nation decides whether to join, leave, or stay in the GSSN
 
             %if an agent doesn't need a sensor, nothing will change here
@@ -207,28 +206,37 @@ classdef NationAgent
             %and do a simple compare to the cost of being part of the GSSN
             
             if obj.need_sensor == 1 && obj.gssn_member == 0
-
-                %simple check, could add complexity here
-
                 %if it's cheaper to mfg a sensor vs joining gssn, nation
                 %will choose to make its own
                 if obj.sensor_manu_cost < fee || obj.budget < fee
                     obj.want_gssn = 0;
-
-                
                 elseif obj.sensor_manu_cost >= fee && obj.budget > fee
                     obj.want_gssn = 1;
-
                 end
-
-                %the agent has now updated its desire of if it wants to be
-                %part of the GSSN or not based on cost alone. Note this
-                %does not change anything if the agent is already part of
-                %the gssn
-            else
+            elseif obj.need_sensor == 0 && obj.gssn_member == 0
+                % if the nation already has sufficient tracking capacity on
+                % its own, it does not need to join the GSSN and pay the
+                % fee
                 obj.want_gssn = 0;
+            elseif obj.need_sensor == 0 && obj.gssn_member == 1
+                % if the object doesn't need a sensor and is currently a
+                % member, it evaluates if it could still maintain the
+                % desired tracking capacity on its own
+                if obj.tracking_capacity/total_objects >= 1.2 || obj.budget <= fee
+                    obj.want_gssn = 0;
+                else
+                    obj.want_gssn = 1;
+                end
+            else
+                % obj needs a sensor and is in the GSSN, so it should stay
+                % in the GSSN until its sensor is built (if it can afford 
+                % to), then re-evaluate
+                if obj.budget <= fee
+                    obj.want_gssn = 0;
+                else
+                    obj.want_gssn = 1;
+                end
             end
-
         end
         
 %        function obj = fuzzing_decision(obj)
@@ -249,7 +257,7 @@ classdef NationAgent
             %take the budget, and add or subtract a percentage of the
             %budget based on standard normal distribution
             
-            obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0,1); % TODO: decide on budget fluctuation
+            obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0.5,1); % TODO: decide on budget fluctuation
             obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
             obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
             obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;
@@ -259,7 +267,7 @@ classdef NationAgent
             % Degrade DQ of all sensors yearly. One possible mechanism to
             % incentivise nations to still build sensors even after joining
             % GSSN.
-            obj.sensor_data_quality = obj.sensor_data_quality * 0.95;
+            obj.sensor_data_quality = obj.sensor_data_quality * 0.99;
 
         end
         
