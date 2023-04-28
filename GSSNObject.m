@@ -4,35 +4,50 @@
 classdef GSSNObject
     
     properties
-
+        timeStep
         num_nations
         num_objects
         nations
         min_data_quality %this is an input to test our hypothesis
         fee
         decision
+        data
         
     end
 
     methods
-        function obj = GSSNObject(nn, dq, cost)
+        function obj = GSSNObject(nn, dq, cost, timeStep, timeVec)
+            % initialize GSSN object
+
             obj.num_nations = nn;
             obj.num_objects = 0; 
             obj.min_data_quality = dq;
             obj.nations = {}; 
             obj.fee = cost;
-            obj.decision = [];
- 
+            obj.timeStep = timeStep;
+            
+            % initialize GSSN data storage
+            obj.data.total_members_cum = zeros(1,length(timeVec));
+            obj.data.total_members_cum(1) = nn;
+            obj.data.tracking_capacity = zeros(1,length(timeVec));
+            obj.data.combined_sensors = zeros(1,length(timeVec));
+
         end
         
-        function obj = update(obj)
+        function obj = update(obj,t)
 
             sum = 0;
+            sumSens = 0;
             for i = 1:obj.num_nations
                 sum = sum + obj.nations{i}.tracking_capacity;
+                sumSens = sumSens + obj.nations{i}.n_sensors;
             end
 
             obj.num_objects = sum;
+            
+            obj.data.total_members_cum(t/obj.timeStep+1) = obj.num_nations;
+            obj.data.tracking_capacity(t/obj.timeStep+1) = sum;
+            obj.data.combined_sensors(t/obj.timeStep+1) = sumSens;
         end
         
         
