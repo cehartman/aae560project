@@ -57,6 +57,7 @@ classdef LEOModel
                 newDebris = newDebris + obj.params.numCollisionDebris*newCollisions;
                 
                 % update number of satellites for current nation
+                nations{iNat}.collision_occurred = newCollisions > 0;
                 nations{iNat}.satellites = nations{iNat}.satellites - newCollisions;
                 nations{iNat}.sat_retire(collisionOccurred) = [];
             end
