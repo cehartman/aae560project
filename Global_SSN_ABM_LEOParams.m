@@ -1,4 +1,4 @@
-function envParams = Global_SSN_ABM_LEOParams()
+function envParams = Global_SSN_ABM_LEOParams(timeStep)
 
 envParams.leoSats            = 5000;                        % Total number of satellites in LEO
 % envParams.leoLaunches        = 70.5/365.2425*timeStep;      % Total launch rate in LEO
