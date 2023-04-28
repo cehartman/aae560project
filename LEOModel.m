@@ -13,16 +13,18 @@ classdef LEOModel
         
         function obj = LEOModel(timeVec,timeStep,envParams)
             % initialize LEO model with time and environment parameters
-            obj.timeStep = timeStep;
-            obj.timeVec = timeVec;
-            obj.params = envParams;
+            obj.timeStep  = timeStep;
+            obj.timeVec   = timeVec;
+            obj.params    = envParams;
             obj.numDebris = envParams.initalDebris;
-            obj.SPD = envParams.initialSPD;
+            obj.SPD       = envParams.initialSPD;
             
             % initialize debris/collisions storage data
-            obj.data.totalDebris = zeros(size(timeVec));
-            obj.data.totalDebris(1) = obj.numDebris;
+            obj.data.totalDebris     = zeros(size(timeVec));
+            obj.data.totalDebris(1)  = obj.numDebris;
             obj.data.totalCollisions = zeros(size(timeVec));
+            obj.data.leoSats         = zeros(size(timeVec));
+            obj.data.leoSats(1)      = obj.params.leoSats;
         end
         
         function [obj,nations] = update(obj,t,nations,gssn)
@@ -34,13 +36,18 @@ classdef LEOModel
             % from previous time step
             obj = obj.update_spd();
             
+            % initial LEO satellite breakdown (modelled and non-modelled / independent)
+            nationSats      = sum(cellfun(@(x) x.satellites, nations));
+            leoSats         = max(obj.params.leoSats,nationSats);
+            independentSats = leoSats - nationSats;
+            
             % for each nation...
             newDebris = 0; % new debris created during this time step from collisions
             for iNat = 1:length(nations)
                 
                 % determine whether any of their satellites experience a 
                 % collision with debris
-                collisionOccurred = obj.DetermineCollision(nations{iNat},gssn);
+                collisionOccurred = obj.DetermineCollision(nations{iNat},gssn,nations{iNat}.satellites);
                 
                 % update total collisions data storage
                 newCollisions = sum(collisionOccurred);
@@ -49,43 +56,60 @@ classdef LEOModel
                 % add debris from this nation's satellite collisions
                 newDebris = newDebris + obj.params.numCollisionDebris*newCollisions;
                 
-                % Update number of satellites for current nation
+                % update number of satellites for current nation
                 nations{iNat}.satellites = nations{iNat}.satellites - newCollisions;
-                nations{iNat}.sat_retire(collisionOccurred) = []; 
+                nations{iNat}.sat_retire(collisionOccurred) = [];
             end
+            
+            % determine collisions for non-modelled nations
+            independentCollisionOccurred   = obj.DetermineCollision([],gssn,independentSats);
+            newIndependentCollisions       = sum(independentCollisionOccurred);
+            newDebris                      = newDebris + obj.params.numCollisionDebris*newIndependentCollisions;
+            finalIndependentSats           = independentSats - newIndependentCollisions;
+            obj.data.totalCollisions(tIdx) = obj.data.totalCollisions(tIdx) + newIndependentCollisions;
             
             % update total debris
             obj.numDebris = obj.numDebris + newDebris;
             obj.data.totalDebris(tIdx) = obj.numDebris;
             
+            % update total LEO satellites
+            finalNationSats        = sum(cellfun(@(x) x.satellites, nations));
+%             obj.params.leoSats     = finalNationSats + finalIndependentSats;
+            obj.data.leoSats(tIdx) = obj.params.leoSats;
         end
         
         function obj = update_spd(obj)
             obj.SPD = obj.numDebris / obj.params.leoVol;
         end
 
-        function collisionOccurred = DetermineCollision(obj,nation,gssn)
+        function collisionOccurred = DetermineCollision(obj,nation,gssn,numSats)
             % Compute Mean Number of Collisions
             c = obj.SPD*obj.params.Asat*obj.params.vRel*obj.timeStep*86400;
-            numPossibleCollisions = poissrnd(c,nation.satellites,1);
+            numPossibleCollisions = poissrnd(c,numSats,1);
             
-            % Determine probability of successfully tracking object that
-            % would cause collision
-            if nation.gssn_member % use GSSN tracking capacity
-                trackingSuccessProb = gssn.num_objects/obj.numDebris;
-            else % use nation's tracking capacity
-                trackingSuccessProb = nation.tracking_capacity/obj.numDebris;
+            % Non-modelled satellites have 50% change of avoiding possible
+            % collisions
+            if isempty(nation)
+                avoidanceDraw = rand(size(numPossibleCollisions));
+                collisionOccurred = numPossibleCollisions > 0 & avoidanceDraw > 0.8;
+            else
+                % Determine probability of successfully tracking object that
+                % would cause collision
+                if nation.gssn_member % use GSSN tracking capacity
+                    trackingSuccessProb = gssn.num_objects/obj.numDebris;
+                else % use nation's tracking capacity
+                    trackingSuccessProb = nation.tracking_capacity/obj.numDebris;
+                end
+
+                % if the random draw is above the tracking success probability,
+                % or if the random draw is below the tracking success
+                % probability but the 99% avoidance chance is failed, the
+                % possible collision does occur
+                trackSuccessDraw = rand(size(numPossibleCollisions));
+                avoidanceDraw = rand(size(numPossibleCollisions));
+                collisionOccurred = numPossibleCollisions > 0 & ((trackSuccessDraw > trackingSuccessProb) ...
+                    | (trackSuccessDraw <= trackingSuccessProb & avoidanceDraw > 0.99));
             end
-            
-            % if the random draw is above the tracking success probability,
-            % or if the random draw is below the tracking success
-            % probability but the 99% avoidance chance is failed, the
-            % possible collision does occur
-            trackSuccessDraw = rand(size(numPossibleCollisions));
-            avoidanceDraw = rand(size(numPossibleCollisions));
-            collisionOccurred = numPossibleCollisions > 0 & ((trackSuccessDraw > trackingSuccessProb) ...
-                | (trackSuccessDraw <= trackingSuccessProb & avoidanceDraw > 0.99));
- 
         end
         
         
