@@ -18,7 +18,7 @@ enable_environment_updates = 1;
 environment_updates_only = 0;
 
 % Initialize Adjustable Parameters / Design Variables
-n_nations = 1;
+n_nations = 10;
 minGssnDQ = 0.8;
 gssnFee   = 2000; % million $ / year
 

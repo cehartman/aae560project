@@ -15,7 +15,7 @@ sensorReqRateStats = [1 0]; % years
 sensorConSpeedStats = [3 0]; % years
 dataQualityStats = [1 0];
 initialSatsRange = [160 160]; 
-initialGssnMemberChance = 0;
+initialGssnMemberChance = 0.4;
 launchRateStats = [5.5 0.0]; % mean launch rate (sat/year)
 
 nationParams.sensors = randi(initialSensorsRange);
