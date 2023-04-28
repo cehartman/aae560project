@@ -8,7 +8,6 @@ classdef GlobalSSAModel
         n_nonmembers
         gssn 
         n_members_cum
-        timeStep
     end
     
     methods
