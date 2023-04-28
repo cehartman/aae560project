@@ -47,7 +47,7 @@ classdef LEOModel
                 
                 % determine whether any of their satellites experience a 
                 % collision with debris
-                collisionOccurred = obj.DetermineCollision(nations{iNat},gssn,nations{iNat}.satellites);
+                collisionOccurred = obj.DetermineCollision(nations{iNat},gssn);
                 
                 % update total collisions data storage
                 newCollisions = sum(collisionOccurred);
@@ -83,15 +83,18 @@ classdef LEOModel
         end
 
         function collisionOccurred = DetermineCollision(obj,nation,gssn,numSats)
+            if nargin < 4
+                numSats = nation.satellites;
+            end
             % Compute Mean Number of Collisions
             c = obj.SPD*obj.params.Asat*obj.params.vRel*obj.timeStep*86400;
             numPossibleCollisions = poissrnd(c,numSats,1);
             
-            % Non-modelled satellites have 50% change of avoiding possible
+            % Non-modelled satellites have a chance of avoiding possible
             % collisions
             if isempty(nation)
                 avoidanceDraw = rand(size(numPossibleCollisions));
-                collisionOccurred = numPossibleCollisions > 0 & avoidanceDraw > 0.8;
+                collisionOccurred = numPossibleCollisions > 0 & avoidanceDraw > 0.80;
             else
                 % Determine probability of successfully tracking object that
                 % would cause collision
