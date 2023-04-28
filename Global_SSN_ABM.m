@@ -17,8 +17,18 @@ global environment_updates_only;
 enable_environment_updates = 1;
 environment_updates_only = 0;
 
-% Initialize Adjustable Parameters
-n_nations = 20;
+% Initialize Adjustable Parameters / Design Variables
+n_nations = 5;
+baseSensorCapability = 500;
+initialSensorsRange = [1 10];
+sensorReqRateStats = [1 0]; % years
+sensorConSpeedStats = [3 0]; % years
+dataQualityStats = [0.95 0.05];
+launchRateStats = [70.5 0.0]; % mean launch rate (sat/year)
+initialSatsRange = [50 160]; 
+initialGssnMemberChance = 0.5;
+minGssnDQ = 0.8;
+gssnFee = 2000; % million $ / year
 
 
 % Economics
@@ -28,8 +38,7 @@ econParams.satOpRev = 279000/8261; % million $ / year per sat
 econParams.newSensorCost = 1600; % million $ from Space Fence
 econParams.sensorOpCost = 6;    % million $ / year from $33m/5yrs5mo for SF
 econParams.inflation = 1.0; % negate inflation; not relevant to RQs
-nationalBudgetsRange = [1000 5000]; % million $
-
+nationalBudgetsRange = [500 5000]; % million $
 
 % Time
 simTime = 100; % [years]
@@ -44,13 +53,13 @@ envParams.numCollisionDebris = 1000;                        % Number of new debr
 envParams.initalDebris = envParams.initialSPD*envParams.leoVol; % Initial number of debris objects in LEO
 
 % Initialize Global SSA model
-timeEnd  = simTime*365.2425;                            % Simulation end time [days]                                 
+timeEnd  = simTime*365.2425;      % Simulation end time [days]                                 
 timeVec  = 0:timeStep:timeEnd;    % Simulation time steps [days]
 gssa_model = GlobalSSAModel(timeVec,timeStep,envParams);
 
 %Add GSSN object 
 %inputs: nn, dq, cost
-gssn = GSSNObject(0, 0.8, 2000);
+gssn = GSSNObject(0, minGssnDQ, gssnFee, timeStep, timeVec);
 
 gssa_model = gssa_model.add_gssn(gssn);
 
@@ -62,26 +71,22 @@ for iNation = 1:n_nations
     % diverse nations)
     
     % create nation and add to GSSA model
-    %inputs are:
-    %id,sensors,sc,scs,smc,soc,dq,gm,fuzz, gdp
-    % TODO: maybe we should move these random sample ranges to adjustable 
-    % parameters section
-    sensors = 10;
-    sensor_capability = 500;
-    sensor_request_rate = 1*365.2425; % days
-    sensor_const_speed = 3*365.2425/timeStep; % time steps % make variable per nation?
-    sensor_mfg_cost = econParams.newSensorCost; % make variable per nation?
-    sensor_ops_cost = econParams.sensorOpCost; % make fixed or variable per nation?
+    sensors = randi(initialSensorsRange);
+    sensor_capability = baseSensorCapability;
+    sensor_request_rate = normrnd(sensorReqRateStats(1),sensorReqRateStats(2))*365.2425; % days
+    sensor_const_speed = normrnd(sensorConSpeedStats(1),sensorConSpeedStats(2))*365.2425/timeStep; % time steps
+    sensor_mfg_cost = econParams.newSensorCost;
+    sensor_ops_cost = econParams.sensorOpCost;
     sat_ops_cost = econParams.satOpCost;
     sat_revenue = econParams.satOpRev;
     sat_proc_cost = econParams.newSatCost;
-    tech_cap = [.95 .05]; % [mean stddev]
-    gssn_member = randi([0 1]);
+    tech_cap = dataQualityStats; % [mean stddev]
+    gssn_member = rand(1) <= initialGssnMemberChance;
     fuzz = 0;
     starting_budget = randi(nationalBudgetsRange);
-    nsat = randi([50 160]); % TODO: make random
+    nsat = randi(initialSatsRange);
     sat_life = 8*365.2425; % days
-    launch_rate = 70.5/365.2425*timeStep; % TODO: based on what? I.e., do we want to move away from random sampling?
+    launch_rate = normrnd(launchRateStats(1),launchRateStats(2))/365.2425*timeStep;
     
     newNation = NationAgent(timeVec, timeStep, iNation, sensors,...
         sensor_capability, sensor_request_rate, sensor_const_speed,...
@@ -95,36 +100,19 @@ for iNation = 1:n_nations
         gssa_model = gssa_model.add_to_gssn(newNation, iNation);
     end
  
+
 end
 
-
-% Create Variables for plotting
-
-
-% Initialize storage arrays
-
-
+gssa_model.gssn = gssa_model.gssn.update(0);
 
 % Start Simulation Steps
 H = waitbar(0/timeVec(end),'Progress:');
-ct = 0;
 for t = timeVec(2:end)
-    ct = ct + 1;
     % perform the next model step
     gssa_model = gssa_model.timestep(t,econParams);
     % update waitbar
     waitbar(t/timeVec(end),H)
-
-  
-    total_members_cum(ct) = gssa_model.n_members;
-   
-
 end
 waitbar(timeVec(end)/timeVec(end),H,'Simulation Complete!');
-
- figure(20)
- plot(timeVec(2:end)/365.2425, total_members_cum)
- xlabel('Time Step')
- ylabel('Number of Nations in GSSN')
 
 [finalCollisions, finalDebris] = GlobalSSN_AnalysisPlots(gssa_model,timeVec);

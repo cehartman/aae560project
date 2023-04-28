@@ -10,7 +10,7 @@ classdef NationAgent
         tracking_capacity
         sensor_request_rate
         sensor_con_speed
-        sensor_manu_cost % per nation or same for all nations?
+        sensor_manu_cost
         sensor_oper_cost
         sat_oper_cost
         sat_proc_cost
@@ -61,8 +61,8 @@ classdef NationAgent
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
             obj.gssn_member = gm;
             obj.fuzzing = fuzz;
-            obj.revenue = 0; % from successful space operations (maybe acrued each time step without a collision?)
-            obj.total_cost = 0; % from sensor construction, sensor operation, satellite collisions
+            obj.revenue = 0; % from successful space operations (acrued each time step per satellite)
+            obj.total_cost = 0; % from sensor construction, sensor operation, etc
             obj.need_sensor = 0; %binary 0 = does not need sensor, 1 = need sensor
             obj.wait_con = 0;
             obj.last_sensor_request = 0;

@@ -98,5 +98,12 @@ xlabel('Time (Years)','FontWeight','Bold');
 title('Cost');
 ylabel('$ (Billions)','FontWeight','Bold');
 
+% GSSN Membership
+figure('Color','w'); hold on; box on; grid on;
+plot(xData,gssa_model.gssn.data.total_members_cum);
+ax = gca; ax.XLim = round([xData(1) xData(end)]);
+xlabel('Time (Years)','FontWeight','Bold');
+title('GSSN Membership');
+ylabel('# of Nations','FontWeight','Bold');
 
 
