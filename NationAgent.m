@@ -212,7 +212,7 @@ classdef NationAgent
                 %if it's cheaper to mfg a sensor vs joining gssn, nation
                 %will choose to make its own
                 if obj.sensor_manu_cost < fee || obj.budget < fee
-                    obj.want_gssn= 0;
+                    obj.want_gssn = 0;
 
                 
                 elseif obj.sensor_manu_cost >= fee && obj.budget > fee
@@ -224,6 +224,8 @@ classdef NationAgent
                 %part of the GSSN or not based on cost alone. Note this
                 %does not change anything if the agent is already part of
                 %the gssn
+            else
+                obj.want_gssn = 0;
             end
 
         end
@@ -256,7 +258,7 @@ classdef NationAgent
             % Degrade DQ of all sensors yearly. One possible mechanism to
             % incentivise nations to still build sensors even after joining
             % GSSN.
-            obj.sensor_data_quality = obj.sensor_data_quality *0.95;
+            obj.sensor_data_quality = obj.sensor_data_quality * 0.95;
 
         end
         

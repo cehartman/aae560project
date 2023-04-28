@@ -52,13 +52,15 @@ legend({'Combined GSSN Sensors','Nation Sensors'});
 
 % Total Satellites
 figure('Color','w'); hold on; box on; grid on;
+plot(xData,gssa_model.leo_environment.data.leoSats,'LineWidth',2);
 for iNation = 1:length(gssa_model.nations)
     plot(xData,gssa_model.nations{iNation}.data.totalSatellites);
 end
-ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 1000];
+ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 max(gssa_model.leo_environment.data.leoSats)];
 xlabel('Time (Years)','FontWeight','Bold');
 title('Total Satellites');
 ylabel('Satellites','FontWeight','Bold');
+legend({'LEO Satellites','Nation Satellites'});
 
 % Tracking Success Probability
 figure('Color','w'); hold on; box on; grid on;
