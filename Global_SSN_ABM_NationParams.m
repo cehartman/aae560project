@@ -15,4 +15,5 @@ fuzz = 0;
 starting_budget = randi(econParams.nationalBudgetsRange);
 nsat = randi(initialSatsRange);
 sat_life = 8*365.2425; % days
+launchRateStats = [5.5 0.0]; % mean launch rate (sat/year)
 launch_rate = normrnd(launchRateStats(1),launchRateStats(2))/365.2425*timeStep;

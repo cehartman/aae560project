@@ -4,7 +4,6 @@ initialSensorsRange = [10 10];
 sensorReqRateStats = [1 0]; % years
 sensorConSpeedStats = [3 0]; % years
 dataQualityStats = [1 0];
-launchRateStats = [5.5 0.0]; % mean launch rate (sat/year)
 initialSatsRange = [160 160]; 
 initialGssnMemberChance = 0;
 minGssnDQ = 0.8;
