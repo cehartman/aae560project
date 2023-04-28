@@ -34,6 +34,7 @@ classdef NationAgent
         launch_rate
         data
         econ_updates
+        collision_occurred
      
     end
     
@@ -74,6 +75,7 @@ classdef NationAgent
             obj.sat_retire = obj.timeVec(1) + rand(1,obj.satellites)*obj.sat_life; %random sample uniformly between 0 and max sat life
             obj.launch_rate = lr;
             obj.econ_updates = 0;
+            obj.collision_occurred = 0;
             
             % initialize data for analysis
             obj.data.totalSensors = ones(size(timeVec))*obj.n_sensors;
@@ -156,9 +158,8 @@ classdef NationAgent
             else
                 total_tracked = obj.tracking_capacity;
             end
-
-
-            if total_tracked < 1.2 * total_objects        
+            
+            if obj.collision_occurred || total_tracked < 1.2 * total_objects
                 obj.need_sensor = 1;
                 obj.last_sensor_request = t;
             else
@@ -192,7 +193,6 @@ classdef NationAgent
                 
                 %reset construction wait counter
                 obj.wait_con = 0;
-
             end
 
         end
