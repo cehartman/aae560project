@@ -86,7 +86,7 @@ classdef LEOModel
             % update total LEO satellites
             independentLaunchEvents = round(normrnd(obj.params.leoLaunchRate,0.5));
             finalNationSats        = sum(cellfun(@(x) x.satellites, nations));
-%             obj.params.leoSats     = finalNationSats + finalIndependentSats + independentLaunchEvents;
+            obj.params.leoSats     = finalNationSats + finalIndependentSats + independentLaunchEvents;
             obj.data.leoSats(tIdx) = obj.params.leoSats;
         end
         
