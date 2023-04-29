@@ -7,15 +7,17 @@ econParams.newSensorCost = 1600; % million $ from Space Fence
 econParams.sensorOpCost = 6;    % million $ / year from $33m/5yrs for SF
 econParams.inflation = 1.0; % negate inflation; not relevant to RQs
 econParams.nationalBudgetsRange = [500 5000]; % million $
+econParams.sensorDiscount = 0;
+econParams.sensorPenalty = 0;
 
 
-initialSensorsRange = [10 10];
+initialSensorsRange = [5 5];
 baseSensorCapability = 500;
 sensorReqRateStats = [1 0]; % years
 sensorConSpeedStats = [3 0]; % years
-dataQualityStats = [1 0];
+dataQualityStats = [randi([10 10])/10 0.0];
 initialSatsRange = [160 160]; 
-initialGssnMemberChance = 0;
+initialGssnMemberChance = 0.4;
 launchRateStats = [5.5 0.0]; % mean launch rate (sat/year)
 
 nationParams.sensors = randi(initialSensorsRange);
@@ -29,7 +31,7 @@ nationParams.sat_revenue = econParams.satOpRev;
 nationParams.sat_proc_cost = econParams.newSatCost;
 nationParams.tech_cap = dataQualityStats; % [mean stddev]
 nationParams.gssn_member = rand(1) <= initialGssnMemberChance;
-nationParams.fuzz = 0;
+nationParams.fuzz = 1.0; % 1.0 = no fuzz, 0.0 = full fuzz
 nationParams.starting_budget = randi(econParams.nationalBudgetsRange);
 nationParams.nsat = randi(initialSatsRange);
 nationParams.sat_life = 8*365.2425; % days
