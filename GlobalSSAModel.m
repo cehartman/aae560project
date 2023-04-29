@@ -86,7 +86,7 @@ classdef GlobalSSAModel
                 %STEP 3: If a nation is in the GSSN, make sure it's DQ is
                 %up to par still
 
-%                 if mod(t,365.2425) < obj.nations{1,1}.timeStep
+                if mod(t,365.2425) < obj.nations{1,1}.timeStep
                     for i = 1:obj.n_nations
                         
                         [obj, decision] = obj.eval_nation(obj.nations{1,i});
@@ -120,7 +120,7 @@ classdef GlobalSSAModel
                             obj = obj.remove_from_gssn(obj.nations{1,i}, i);
                         end
                     end
-%                 end
+                end
                 
                 % update GSSN object
                 obj.gssn = obj.gssn.update(t);
