@@ -296,7 +296,7 @@ classdef NationAgent
                 % Degrade DQ of all sensors yearly. One possible mechanism to
                 % incentivise nations to still build sensors even after joining
                 % GSSN.
-                obj.sensor_data_quality = obj.sensor_data_quality * 0.99;
+                obj.sensor_data_quality = obj.sensor_data_quality * 1.00;
             end
         end
         

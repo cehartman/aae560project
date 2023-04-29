@@ -70,7 +70,7 @@ for iNation = 1:n_nations
 
 end
 
-gssa_model.gssn = gssa_model.gssn.update(0);
+gssa_model.gssn = gssa_model.gssn.update(gssa_model.nations,0);
 
 % Start Simulation Steps
 H = waitbar(0/timeVec(end),'Progress:');

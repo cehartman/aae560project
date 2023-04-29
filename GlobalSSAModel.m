@@ -144,7 +144,7 @@ classdef GlobalSSAModel
                 end
 
                 % update GSSN object
-                obj.gssn = obj.gssn.update(t);
+                obj.gssn = obj.gssn.update(obj.nations,t);
             end
         end
     end
