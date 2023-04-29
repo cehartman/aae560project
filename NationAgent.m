@@ -39,6 +39,7 @@ classdef NationAgent
         sat_life
         sat_retire
         launch_rate
+        launch_rate_increase
         data
         econ_updates
         collision_occurred
@@ -47,7 +48,7 @@ classdef NationAgent
     
     methods
         
-        function obj = NationAgent(timeVec,timeStep,id,sensors,sc,srr,scs,smc,soc,satoc,spc,sr,tc,gm,fuzz,gdp,nsat,sat_life,lr)
+        function obj = NationAgent(timeVec,timeStep,id,sensors,sc,srr,scs,smc,soc,satoc,spc,sr,tc,gm,fuzz,gdp,nsat,sat_life,lr,lri)
             obj.timeVec = timeVec;
             obj.timeStep = timeStep;
             obj.id = id;
@@ -87,6 +88,7 @@ classdef NationAgent
             obj.sat_life = sat_life;
             obj.sat_retire = obj.timeVec(1) + rand(1,obj.satellites)*obj.sat_life; %random sample uniformly between 0 and max sat life
             obj.launch_rate = lr;
+            obj.launch_rate_increase = lri;
             obj.econ_updates = 0;
             obj.collision_occurred = 0;
             
@@ -239,12 +241,18 @@ classdef NationAgent
             %and do a simple compare to the cost of being part of the GSSN
             
             if obj.need_sensor == 1 && ~obj.gssn_member
-                %if it's cheaper to mfg a sensor vs joining gssn, nation
-                %will choose to make its own
-                if obj.sensor_manu_cost < fee || obj.budget < fee
+                %if nation cannot afford the gssn fee, it cannot join
+                if obj.budget < fee
                     obj.want_gssn = 0;
-                elseif obj.sensor_manu_cost >= fee && obj.budget > fee
-                    obj.want_gssn = 1;
+                else
+                %if it is cheaper to mfg a sensor vs joining gssn, and
+                % building a new sensor will give sufficient tracking
+                % capacity, then nation will choose to build its own
+                    if obj.sensor_manu_cost < fee && (obj.tracking_capacity + obj.sensor_capability*obj.tech_cap(1))/total_objects >= 1.2
+                        obj.want_gssn = 0;
+                    else
+                        obj.want_gssn = 1;
+                    end
                 end
             elseif obj.need_sensor == 0 && ~obj.gssn_member
                 % if the nation already has sufficient tracking capacity on
@@ -333,6 +341,10 @@ classdef NationAgent
             %TODO: what economic considerations determine when satellites are launched?
 
             % random draw to determine possible launches
+            % nations increase launch rate at +0.05 per year
+            if mod(t,365.2425) < obj.timeStep
+                obj.launch_rate = obj.launch_rate + obj.launch_rate_increase;
+            end
             launchEvents = round(normrnd(obj.launch_rate,0.5));
             if launchEvents < 0 || randi([0 1]) == 0 % coin toss to prevent launches 50% of the time (may update this)
                launchEvents = 0; 

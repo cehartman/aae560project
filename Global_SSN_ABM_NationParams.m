@@ -36,3 +36,4 @@ nationParams.starting_budget = randi(econParams.nationalBudgetsRange);
 nationParams.nsat = randi(initialSatsRange);
 nationParams.sat_life = 8*365.2425; % years->days
 nationParams.launch_rate = normrnd(launchRateStats(1),launchRateStats(2))/365.2425*timeStep;
+nationParams.launchRateIncrease = 0.05; % launch rate increase per year

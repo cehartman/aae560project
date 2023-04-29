@@ -19,8 +19,8 @@ environment_updates_only = 0;
 
 % Initialize Adjustable Parameters / Design Variables
 n_nations = 10;
-minGssnDQ = 0.8;
-gssnFeeCoeff = [800 0]; % million $ / year
+minGssnDQ = 0.6;
+gssnFeeCoeff = [500 100]; % million $ / year
 wait_times = [1 1 5]; % wait, leave, kick [years]
 
 % Time
@@ -59,7 +59,8 @@ for iNation = 1:n_nations
         nationParams.sat_revenue, nationParams.tech_cap, ...
         nationParams.gssn_member, nationParams.fuzz, ...
         nationParams.starting_budget, nationParams.nsat, ...
-        nationParams.sat_life, nationParams.launch_rate);
+        nationParams.sat_life, nationParams.launch_rate, ...
+        nationParams.launchRateIncrease);
 
     gssa_model = gssa_model.add_nation(newNation); % supply inputs 
 
