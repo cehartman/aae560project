@@ -14,12 +14,13 @@ plot(xData,gssa_model.gssn.data.tracking_capacity,'LineWidth',2);
 for iNation = 1:length(gssa_model.nations)
     plot(xData,gssa_model.nations{iNation}.data.trackingCapacity);
 end
-ax = gca; ax.XLim = round([xData(1) xData(end)]);
+ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim(1) = 0;
 ax.YAxis.Exponent = 0;
 title('Tracking');
 xlabel('Time (Years)','FontWeight','Bold');
 ylabel('Objects','FontWeight','Bold');
-legend({'Debris','GSSN Tracking Capacity','Nation Tracking Capacity'});
+lgdStr = strcat({'Nation '},strsplit(num2str(1:10)),{' Tracking Capacity'});
+legend([{'Debris','GSSN Tracking Capacity'},lgdStr]);
 
 % Total Debris
 figure('Color','w'); hold on; box on; grid on;
@@ -48,7 +49,24 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]);
 xlabel('Time (Years)','FontWeight','Bold');
 title('Total Number of Sensors');
 ylabel('Sensors','FontWeight','Bold');
-legend({'Combined GSSN Sensors','Nation Sensors'});
+lgdStr = strcat({'Nation '},strsplit(num2str(1:10)),{' Sensors'});
+legend([{'Combined GSSN Sensors'},lgdStr]);
+
+% Sensor Status
+figure('Color','w'); hold on; box on; grid on;
+all_colors = {'r','y','b','g'};
+for iNation = 1:length(gssa_model.nations)
+    for iStatus = 1:length(gssa_model.nations{iNation}.all_status)
+        statusData = double(strcmp(gssa_model.nations{iNation}.data.sensorStatus,gssa_model.nations{iNation}.all_status{iStatus}));
+        statusData(statusData == 0) = NaN;
+        plot(xData,iNation*statusData,[all_colors{iStatus},'.'],'MarkerSize',10);
+    end
+end
+ax = gca; ax.XLim = round([xData(1) xData(end)]);
+xlabel('Time (Years)','FontWeight','Bold');
+title('Sensors Status');
+ylabel('Status','FontWeight','Bold');
+legend(gssa_model.nations{iNation}.all_status);
 
 % Total Satellites
 figure('Color','w'); hold on; box on; grid on;
@@ -60,7 +78,8 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 max(gssa_model.le
 xlabel('Time (Years)','FontWeight','Bold');
 title('Total Satellites');
 ylabel('Satellites','FontWeight','Bold');
-legend({'LEO Satellites','Nation Satellites'});
+lgdStr = strcat({'Nation '},strsplit(num2str(1:10)),{' Satellites'});
+legend([{'LEO Satellites'},lgdStr]);
 
 % Tracking Success Probability
 figure('Color','w'); hold on; box on; grid on;
@@ -73,7 +92,8 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 1.5];
 xlabel('Time (Years)','FontWeight','Bold');
 title('Tracking Success Probability');
 ylabel('Tracking Success Probability','FontWeight','Bold');
-legend({'GSSN','Nations'});
+lgdStr = strcat({'Nation '},strsplit(num2str(1:10)));
+legend([{'GSSN'},lgdStr]);
 
 % Total Budget
 figure('Color','w'); hold on; box on; grid on;
@@ -84,6 +104,8 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]);
 xlabel('Time (Years)','FontWeight','Bold');
 title('Budget');
 ylabel('$ (Billions)','FontWeight','Bold');
+lgdStr = strcat({'Nation '},strsplit(num2str(1:10)));
+legend(lgdStr);
 
 % Total Revenue
 figure('Color','w'); hold on; box on; grid on;
@@ -94,6 +116,8 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]);
 xlabel('Time (Years)','FontWeight','Bold');
 title('Revenue');
 ylabel('$ (Billions)','FontWeight','Bold');
+lgdStr = strcat({'Nation '},strsplit(num2str(1:10)));
+legend(lgdStr);
 
 % Total Cost
 figure('Color','w'); hold on; box on; grid on;
@@ -104,6 +128,8 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]);
 xlabel('Time (Years)','FontWeight','Bold');
 title('Cost');
 ylabel('$ (Billions)','FontWeight','Bold');
+lgdStr = strcat({'Nation '},strsplit(num2str(1:10)));
+legend(lgdStr);
 
 % GSSN Membership
 figure('Color','w'); hold on; box on; grid on;

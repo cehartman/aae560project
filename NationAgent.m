@@ -24,6 +24,8 @@ classdef NationAgent
         total_cost
         need_sensor %bool
         last_sensor_request
+        sensor_con_status
+        all_status
         wait_con
         want_gssn %bool
         budget
@@ -66,6 +68,8 @@ classdef NationAgent
             obj.total_cost = 0; % from sensor construction, sensor operation, etc
             obj.need_sensor = 0; %binary 0 = does not need sensor, 1 = need sensor
             obj.wait_con = 0;
+            obj.sensor_con_status = 'na';
+            obj.all_status = {'na','requested','building','done'};
             obj.last_sensor_request = 0;
             obj.want_gssn = gm;
             obj.budget = gdp;
@@ -86,6 +90,7 @@ classdef NationAgent
             obj.data.cost = zeros(size(timeVec));
             obj.data.curSatOpCost = zeros(size(timeVec));
             obj.data.curSatOpRev = zeros(size(timeVec));
+            obj.data.sensorStatus = repmat({obj.sensor_con_status},size(timeVec));
         end
         
         function obj = update(obj, t, total_objects, gssn_objects, fee, econParams)
@@ -94,38 +99,21 @@ classdef NationAgent
             tIdx = t/obj.timeStep+1;
             
             % possibly update economic conditions (only performed annually)
-            if mod(t,365.2425) < obj.timeStep
-                obj.econ_updates = obj.econ_updates + 1;
-                obj = obj.update_economic_conditions(econParams);
-            end
+            obj = obj.update_economic_conditions(t,econParams);
             
             % nation evaluates if it desires a new sensor
-            if obj.need_sensor == 0 || obj.collision_occurred || ...
-                    (t - obj.last_sensor_request) >= obj.sensor_request_rate
-                obj = obj.sensor_desire(t,total_objects,gssn_objects);
-                if obj.need_sensor == 1
-                    disp(['Nation ' num2str(obj.id) ' requested sensor at year ' num2str(years(days(t)))]);
-                end
-            end
-
-            % nation evaluates whether it wants to be in the GSSN
+            obj = obj.sensor_desire(t,total_objects,gssn_objects);
+            
+            % determine if nation would rather join the gssn
             obj = obj.gssn_desire(fee,total_objects);
 
-            %if the agent does not want to be part of the gssn but does 
+            % if the agent does not want to be part of the gssn but does 
             % want to add a sensor, and can afford it, 
             % add (or continue adding) the sensor
-
-            %if a nation cannot afford it, it will have to wait until the
-            %next timestep it can afford it to continue manufacturing it
+            obj = obj.add_sensor(t,econParams);
             
-%             if obj.want_gssn == 0 && 
-            if obj.need_sensor == 1 ...
-                    && obj.budget >= (obj.sensor_manu_cost + obj.sensor_oper_cost)
-                obj = obj.add_sensor(econParams);
-                if obj.wait_con == 0
-                    disp(['Nation ' num2str(obj.id) ' added sensor at year ' num2str(years(days(t)))]);
-                end
-            end
+            % update sensor construction progress
+            obj = obj.update_sensor_progress(t);
             
             % update tracking capacity
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
@@ -143,6 +131,7 @@ classdef NationAgent
             obj.data.budget(tIdx) = obj.budget;
             obj.data.revenue(tIdx) = obj.revenue;
             obj.data.cost(tIdx) = obj.total_cost;
+            obj.data.sensorStatus{tIdx} = obj.sensor_con_status;
 
         end
         
@@ -150,53 +139,77 @@ classdef NationAgent
             %this method requires input of the total number of objects in
             %the environment and updates the desire of the agent to build a
             %sensor or not
-
-            %if the agent is part of the gssn, total tracking capability of
-            %the agent is the number of gssn objects being tracked
             
-            if obj.gssn_member == 1
-                total_tracked = max(gssn_objects,obj.tracking_capacity);
-            else
-                total_tracked = obj.tracking_capacity;
+            % if 
+            if strcmp(obj.sensor_con_status,'na') || ...
+                    (obj.collision_occurred && ~any(strcmp(obj.sensor_con_status,{'requested','building','done'}))) || ...
+                    (t - obj.last_sensor_request) >= obj.sensor_request_rate
+                
+                %if the agent is part of the gssn, total tracking capability of
+                %the agent is the number of gssn objects being tracked
+                if obj.gssn_member
+                    total_tracked = max(gssn_objects,obj.tracking_capacity);
+                else
+                    total_tracked = obj.tracking_capacity;
+                end
+                
+                if obj.wait_con > 0
+                    obj.need_sensor = 1;
+                elseif obj.collision_occurred || total_tracked < 1.2 * total_objects
+                    obj.need_sensor = 1;
+                    obj.last_sensor_request = t;
+                    obj.sensor_con_status = 'requested';
+                    fprintf('Year %.4f: Nation %d requested sensor\n',years(days(t)),obj.id);
+%                     disp(['Nation ' num2str(obj.id) ' requested sensor at year ' num2str(years(days(t)))]);
+                else
+                    obj.need_sensor = 0;
+                end
+                
+                %the agent has now expressed a desire for a new sensor or not
             end
-            
-            if obj.collision_occurred || total_tracked < 1.2 * total_objects
-                obj.need_sensor = 1;
-                obj.last_sensor_request = t;
-            else
-                obj.need_sensor = 0;
-            end
-
-            %the agent has now expressed a desire for a new sensor or not
         end
         
-        function obj = add_sensor(obj,econParams)
-            % if nation desires to add a sensor, and does not join the SSA to meet tracking needs,
+        function obj = update_sensor_progress(obj,t)
             % this method tracks how long the agent has been waiting for
             % the sensor to be built
-
-            %if the agent hasn't been waiting long enough, keep waiting
-            if obj.wait_con < obj.sensor_con_speed
+            
+            % if the agent just requested a sensor
+            if (strcmp(obj.sensor_con_status,'na') && obj.wait_con == 0) || ...
+                    (strcmp(obj.sensor_con_status,'requested') && (t - obj.last_sensor_request) == 0)
+            % if the agent hasn't been waiting long enough, keep waiting
+            elseif obj.wait_con < obj.sensor_con_speed
                 obj.wait_con = obj.wait_con + 1;
-
-            %if enough time has passed, add the cost of the sensor mfg to
-            %the total cost, and increment the number of sensors
-            elseif obj.wait_con >= obj.sensor_con_speed
+                obj.sensor_con_status = 'building';
+            else
+                obj.sensor_con_status = 'done';
+            end
+        end
+        
+        function obj = add_sensor(obj,t,econParams)
+            % if nation desires to add a sensor, and does not join the SSA to meet tracking needs,
+            
+            % if a nation cannot afford it, it will have to wait until the
+            % next timestep it can afford it to continue manufacturing it
+            if strcmp(obj.sensor_con_status,'done') && obj.budget >= (obj.sensor_manu_cost + obj.sensor_oper_cost)
+                % if enough time has passed, add the cost of the sensor mfg to
+                % the total cost, and increment the number of sensors
                 obj.total_cost = obj.total_cost + obj.sensor_manu_cost;
                 obj.budget = obj.budget - obj.sensor_manu_cost;
                 obj.n_sensors = obj.n_sensors + 1;
                 obj.sensor_manu_cost = max(obj.sensor_manu_cost - econParams.sensorDiscount,600);
                 
-                %add sensor with a random data quality
+                % add sensor with a random data quality
                 sdq = normrnd(obj.tech_cap(1),obj.tech_cap(2));
                 obj.sensor_data_quality(end+1) = sdq;
                 obj.nation_data_quality = mean(obj.sensor_data_quality);
                 obj.sensor_tracking_capacity(end+1) = obj.sensor_capability*sdq;
                 
-                %reset construction wait counter
+                % reset construction wait counter
                 obj.wait_con = 0;
+                obj.sensor_con_status = 'na';
+                
+                fprintf('Year %.4f: Nation %d added sensor\n',years(days(t)),obj.id);
             end
-
         end
         
         function obj = gssn_desire(obj, fee, total_objects)
@@ -207,7 +220,7 @@ classdef NationAgent
             %gssn already, figure out how much adding a sensor would cost
             %and do a simple compare to the cost of being part of the GSSN
             
-            if obj.need_sensor == 1 && obj.gssn_member == 0
+            if obj.need_sensor == 1 && ~obj.gssn_member
                 %if it's cheaper to mfg a sensor vs joining gssn, nation
                 %will choose to make its own
                 if obj.sensor_manu_cost < fee || obj.budget < fee
@@ -215,12 +228,12 @@ classdef NationAgent
                 elseif obj.sensor_manu_cost >= fee && obj.budget > fee
                     obj.want_gssn = 1;
                 end
-            elseif obj.need_sensor == 0 && obj.gssn_member == 0
+            elseif obj.need_sensor == 0 && ~obj.gssn_member
                 % if the nation already has sufficient tracking capacity on
                 % its own, it does not need to join the GSSN and pay the
                 % fee
                 obj.want_gssn = 0;
-            elseif obj.need_sensor == 0 && obj.gssn_member == 1
+            elseif obj.need_sensor == 0 && obj.gssn_member
                 % if the object doesn't need a sensor and is currently a
                 % member, it evaluates if it could still maintain the
                 % desired tracking capacity on its own
@@ -241,7 +254,7 @@ classdef NationAgent
             end
         end
         
-        function obj = update_economic_conditions(obj,econParams)
+        function obj = update_economic_conditions(obj,t,econParams)
             % "The SoS model also needs to support the injection of events 
             % that shape the economic or political conditions under which 
             % each nation is operating at that time, which affects 
@@ -249,30 +262,31 @@ classdef NationAgent
             % sensor addition timeline."
             
             % updates annually, not each timestep
-
-            %simulates random fluctuations in the nations budget
-            %take the budget, and add or subtract a percentage of the
-            %budget based on standard normal distribution
-            
-            obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0.5,1); % TODO: decide on budget fluctuation
-            obj.sensor_manu_cost = min(obj.sensor_manu_cost+econParams.sensorPenalty,2000)*econParams.inflation;
-            obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
-            obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;
-            obj.sat_proc_cost = obj.sat_proc_cost*econParams.inflation;
-            obj.sat_revenue = obj.sat_revenue*econParams.inflation;
-
-            % Degrade DQ of all sensors yearly. One possible mechanism to
-            % incentivise nations to still build sensors even after joining
-            % GSSN.
-            obj.sensor_data_quality = obj.sensor_data_quality * 0.99;
-
+            if mod(t,365.2425) < obj.timeStep
+                obj.econ_updates = obj.econ_updates + 1;
+                
+                %simulates random fluctuations in the nations budget
+                %take the budget, and add or subtract a percentage of the
+                %budget based on standard normal distribution
+                obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0.5,1); % TODO: decide on budget fluctuation
+                obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
+                obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
+                obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;
+                obj.sat_proc_cost = obj.sat_proc_cost*econParams.inflation;
+                obj.sat_revenue = obj.sat_revenue*econParams.inflation;
+                
+                % Degrade DQ of all sensors yearly. One possible mechanism to
+                % incentivise nations to still build sensors even after joining
+                % GSSN.
+                obj.sensor_data_quality = obj.sensor_data_quality * 0.99;
+            end
         end
         
         function obj = update_costs_and_revenue(obj, tIdx, fee)
             % costs from sensor operation, satellite operation, revenue from
             % satellite operations. Manufacturing costs applied elsewhere.
             
-            if obj.gssn_member == 1
+            if obj.gssn_member
                 obj.budget = obj.budget - fee*obj.timeStep/365.2426;
             end
 
@@ -294,8 +308,6 @@ classdef NationAgent
             % update data
             obj.data.curSatOpCost(tIdx) = currentSatOpCost;
             obj.data.curSatOpRev(tIdx) = currentSatRev;
-
-
         end
         
         function obj = update_satellites(obj,t)
@@ -325,8 +337,6 @@ classdef NationAgent
             retireEvents = sum(retireEventsIdx);
             obj.satellites = obj.satellites - retireEvents;
             obj.sat_retire(retireEventsIdx) = [];
-
         end
-        
     end
 end
