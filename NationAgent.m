@@ -140,9 +140,8 @@ classdef NationAgent
             %the environment and updates the desire of the agent to build a
             %sensor or not
             
-            % if 
+            % if sensor is able to be requested
             if strcmp(obj.sensor_con_status,'na') || ...
-                    (obj.collision_occurred && ~any(strcmp(obj.sensor_con_status,{'requested','building','done'}))) || ...
                     (t - obj.last_sensor_request) >= obj.sensor_request_rate
                 
                 %if the agent is part of the gssn, total tracking capability of
@@ -153,6 +152,7 @@ classdef NationAgent
                     total_tracked = obj.tracking_capacity;
                 end
                 
+                % if collision occurred or tracking capacity insufficient
                 if obj.wait_con > 0
                     obj.need_sensor = 1;
                 elseif obj.collision_occurred || total_tracked < 1.2 * total_objects
@@ -160,7 +160,6 @@ classdef NationAgent
                     obj.last_sensor_request = t;
                     obj.sensor_con_status = 'requested';
                     fprintf('Year %.4f: Nation %d requested sensor\n',years(days(t)),obj.id);
-%                     disp(['Nation ' num2str(obj.id) ' requested sensor at year ' num2str(years(days(t)))]);
                 else
                     obj.need_sensor = 0;
                 end
