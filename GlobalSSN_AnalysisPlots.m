@@ -65,7 +65,7 @@ end
 ax = gca; ax.XLim = round([xData(1) xData(end)]);
 xlabel('Time (Years)','FontWeight','Bold');
 title('Sensors Status');
-ylabel('Status','FontWeight','Bold');
+ylabel('Nation','FontWeight','Bold');
 legend(gssa_model.nations{iNation}.all_status);
 
 % Total Satellites
@@ -138,5 +138,21 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]);
 xlabel('Time (Years)','FontWeight','Bold');
 title('GSSN Membership');
 ylabel('# of Nations','FontWeight','Bold');
+
+% GSSN Membership Status by Nation
+figure('Color','w'); hold on; box on; grid on;
+all_colors = {'r','g','m','y','b'};
+for iNation = 1:length(gssa_model.nations)
+    for iStatus = 1:length(gssa_model.nations{iNation}.all_gssn_member_status)
+        statusData = double(strcmp(gssa_model.nations{iNation}.data.gssnMemberStatus,gssa_model.nations{iNation}.all_gssn_member_status{iStatus}));
+        statusData(statusData == 0) = NaN;
+        plot(xData,iNation*statusData,[all_colors{iStatus},'.'],'MarkerSize',10);
+    end
+end
+ax = gca; ax.XLim = round([xData(1) xData(end)]);
+xlabel('Time (Years)','FontWeight','Bold');
+title('GSSN Membership Status');
+ylabel('Nation','FontWeight','Bold');
+legend(gssa_model.nations{iNation}.all_gssn_member_status);
 
 

@@ -18,13 +18,9 @@ classdef GlobalSSAModel
             obj.n_members = 0;
             obj.n_nonmembers = 0;
             
-           
-            
             % initialize LEO satellite/debris model
             obj.leo_environment = LEOModel(timeVec,timeStep,envParams);
-            
         end
-        
         
         function obj = add_nation(obj, nation_agent)
             % Adds a nation agent object
@@ -41,6 +37,7 @@ classdef GlobalSSAModel
 
             obj.gssn = obj.gssn.add_nation(nation);
             obj.nations{1,id}.gssn_member = true;
+            obj.nations{1,id}.gssn_member_status = 'good-standing';
             obj.n_members = obj.n_members + 1;
 
         end
@@ -48,6 +45,7 @@ classdef GlobalSSAModel
         function obj = remove_from_gssn(obj, nation,id)
             obj.gssn = obj.gssn.remove_nation(nation);
             obj.nations{1,id}.gssn_member = false;
+            obj.nations{1,id}.gssn_member_status = 'non-member';
             obj.n_members = obj.n_members - 1;
 
         end
@@ -57,9 +55,7 @@ classdef GlobalSSAModel
             [obj.gssn, decision] = obj.gssn.evaluate(nation);
 
         end
-
-            
-
+ 
         function obj = timestep(obj,t,econParams)
             global enable_environment_updates
             global environment_updates_only
@@ -74,54 +70,79 @@ classdef GlobalSSAModel
                 total_objects = 8000;
             end
 
-            
             if ~environment_updates_only % TODO: remove
                 %STEP 2: Update Nation Preferences
                 for i = 1:obj.n_nations
                     obj.nations{i} = obj.nations{i}.update(t, total_objects,...
                         obj.gssn.num_objects, obj.gssn.fee, econParams);
                 end
-
-
-                %STEP 3: If a nation is in the GSSN, make sure it's DQ is
-                %up to par still
-
-                if mod(t,365.2425) < obj.nations{1,1}.timeStep
-                    for i = 1:obj.n_nations
-                        
-                        [obj, decision] = obj.eval_nation(obj.nations{1,i});
-                        
-                        %if a nation wants to be in the gssn but isn't
-                        %currently, and the gssn will let them in, add them
-                        if obj.nations{1,i}.want_gssn == 1 && ...
-                                ~obj.nations{1,i}.gssn_member && ...
-                                decision == 1
+                
+                %STEP 3: Evaluate GSSN membership statuses
+                for i = 1:obj.n_nations
+                    
+                    [obj, decision] = obj.eval_nation(obj.nations{1,i});
+                    
+                    if obj.nations{1,i}.want_gssn == 1 && ...
+                            ~obj.nations{1,i}.gssn_member && ...
+                            decision == 1
+                        % if a nation wants to be in the gssn but isn't
+                        % currently, and the gssn will let them in, add them
+                        if obj.nations{1,i}.gssn_entry_wait >= obj.gssn.entry_wait
                             obj = obj.add_to_gssn(obj.nations{1,i}, i);
-                            
+                            obj.nations{1,i} = obj.nations{1,i}.reset_gssn_waits();
+                        else
+                            obj.nations{1,i}.gssn_entry_wait = obj.nations{1,i}.gssn_entry_wait + 1;
+                            obj.nations{1,i}.gssn_member_status = 'joining';
+                        end                       
+                        
+                    elseif obj.nations{1,i}.want_gssn == 0 &&...
+                            obj.nations{1,i}.gssn_member
+                        % if a nation wants out, let them out
+                        if obj.nations{1,i}.gssn_leave_wait >= obj.gssn.leave_wait
+                            obj = obj.remove_from_gssn(obj.nations{1,i}, i);
+                            obj.nations{1,i} = obj.nations{1,i}.reset_gssn_waits();
+                        else
+                            obj.nations{1,i}.gssn_leave_wait = obj.nations{1,i}.gssn_leave_wait + 1;
+                            obj.nations{1,i}.gssn_kick_wait = obj.nations{1,i}.gssn_kick_wait + 1; % TODO: might be a better way to deal with this
+                            obj.nations{1,i}.gssn_member_status = 'leaving';
                         end
                         
-                        %if a nation wants out, let them out
-                        if obj.nations{1,i}.want_gssn == 0 &&...
-                                obj.nations{1,i}.gssn_member
+                    elseif obj.nations{1,i}.gssn_member && ...
+                            obj.nations{1,i}.want_gssn == 1 &&...
+                            decision == 0
+                        % if a nation wants to be a member, is currently a
+                        % member, but the GSSN rejects them, remove them
+                        if obj.nations{1,i}.gssn_kick_wait >= obj.gssn.kick_wait
                             obj = obj.remove_from_gssn(obj.nations{1,i}, i);
+                            obj.nations{1,i} = obj.nations{1,i}.reset_gssn_waits();
+                        else
+                            obj.nations{1,i}.gssn_kick_wait = obj.nations{1,i}.gssn_kick_wait + 1;
+                            obj.nations{1,i}.gssn_member_status = 'bad-standing';
                         end
                         
-                        %if a nation wants to be a member, is currently a
-                        %member, but the GSSN rejects them, remove them
-                        if obj.nations{1,i}.gssn_member && ...
-                                obj.nations{1,i}.want_gssn == 1 &&...
-                                decision == 0
-                            obj = obj.remove_from_gssn(obj.nations{1,i}, i);
-                        end
+                    elseif obj.nations{1,i}.gssn_member && ...
+                            obj.nations{1,i}.want_gssn == 1 &&...
+                            decision == 1
+                        % if nation is a member, wants to be, and the GSSN
+                        % permits them, the nation remains in good standing
+                        obj.nations{1,i}.gssn_member_status = 'good-standing';
+                        obj.nations{1,i} = obj.nations{1,i}.reset_gssn_waits();          
+
+                    elseif ~obj.nations{1,i}.gssn_member && ...
+                            obj.nations{1,i}.want_gssn == 1 &&...
+                            decision == 0
+                        % if the nation is not a member, wants to join, but
+                        % the GSSN will not admit them, take no action
                         
-                        if obj.nations{1,i}.gssn_member && ...
-                                obj.nations{1,i}.want_gssn == 0 &&...
-                                decision == 0
-                            obj = obj.remove_from_gssn(obj.nations{1,i}, i);
-                        end
+                    elseif ~obj.nations{1,i}.gssn_member && ...
+                            obj.nations{1,i}.want_gssn == 0 
+                        % if the nation is not a member and does not want
+                        % join, take no action
+                    else
+                        error('Unexpected GSSN membership condition!');
                     end
                 end
-                
+
                 % update GSSN object
                 obj.gssn = obj.gssn.update(t);
             end
