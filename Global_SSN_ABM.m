@@ -21,6 +21,7 @@ environment_updates_only = 0;
 n_nations = 10;
 minGssnDQ = 0.8;
 gssnFeeCoeff = [800 0]; % million $ / year
+wait_times = [1 1 5]; % wait, leave, kick [years]
 
 % Time
 simTime = 100; % [years]
@@ -36,7 +37,7 @@ gssa_model = GlobalSSAModel(timeVec,timeStep,envParams);
 
 %Add GSSN object 
 %inputs: nn, dq, cost
-gssn = GSSNObject(0, minGssnDQ, gssnFeeCoeff, timeStep, timeVec);
+gssn = GSSNObject(0, minGssnDQ, gssnFeeCoeff, wait_times, timeStep, timeVec);
 
 gssa_model = gssa_model.add_gssn(gssn);
 

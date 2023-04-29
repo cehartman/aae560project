@@ -12,12 +12,15 @@ classdef GSSNObject
         feeCoeff
         fee
         decision
+        entry_wait
+        leave_wait
+        kick_wait
         data
         
     end
 
     methods
-        function obj = GSSNObject(nn, dq, gssnFeeCoeff, timeStep, timeVec)
+        function obj = GSSNObject(nn, dq, gssnFeeCoeff, wait_times, timeStep, timeVec)
             % initialize GSSN object
 
             obj.num_nations = nn;
@@ -27,6 +30,9 @@ classdef GSSNObject
             obj.feeCoeff = gssnFeeCoeff;
             obj.fee = 0;
             obj.timeStep = timeStep;
+            obj.entry_wait = wait_times(1)*365.2425/timeStep; % time steps;
+            obj.leave_wait = wait_times(2)*365.2425/timeStep; % time steps;
+            obj.kick_wait = wait_times(3)*365.2425/timeStep; % time steps;
             
             % initialize GSSN data storage
             obj.data.total_members_cum = zeros(1,length(timeVec));

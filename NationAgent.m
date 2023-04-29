@@ -16,6 +16,8 @@ classdef NationAgent
         sat_proc_cost
         sat_revenue
         gssn_member % bool
+        gssn_member_status
+        all_gssn_member_status
         fuzz_factor % bool
         tech_cap % technological capability (mean and std dev)
         sensor_data_quality %array of sensor data qualities
@@ -28,6 +30,9 @@ classdef NationAgent
         all_status
         wait_con
         want_gssn %bool
+        gssn_entry_wait
+        gssn_leave_wait
+        gssn_kick_wait
         budget
         yearly_budget
         satellites
@@ -37,7 +42,7 @@ classdef NationAgent
         data
         econ_updates
         collision_occurred
-     
+        
     end
     
     methods
@@ -63,6 +68,7 @@ classdef NationAgent
             obj.sensor_tracking_capacity = sc*obj.sensor_data_quality;
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
             obj.gssn_member = gm;
+            obj.all_gssn_member_status = {'non-member','good-standing','bad-standing','joining','leaving'};
             obj.fuzz_factor = fuzz;
             obj.revenue = 0; % from successful space operations (acrued each time step per satellite)
             obj.total_cost = 0; % from sensor construction, sensor operation, etc
@@ -72,6 +78,9 @@ classdef NationAgent
             obj.all_status = {'na','requested','building','done'};
             obj.last_sensor_request = 0;
             obj.want_gssn = gm;
+            obj.gssn_entry_wait = 0;
+            obj.gssn_leave_wait = 0;
+            obj.gssn_kick_wait = 0;
             obj.budget = gdp;
             obj.yearly_budget = gdp;
             obj.satellites = nsat;
@@ -91,6 +100,15 @@ classdef NationAgent
             obj.data.curSatOpCost = zeros(size(timeVec));
             obj.data.curSatOpRev = zeros(size(timeVec));
             obj.data.sensorStatus = repmat({obj.sensor_con_status},size(timeVec));
+            obj.data.gssnMemberStatus = repmat({'non-member'},size(timeVec));
+            
+            % set GSSN member status
+            if obj.gssn_member
+                obj.gssn_member_status = 'good-standing';
+                obj.data.gssnMemberStatus{1} = 'good-standing';
+            else
+                obj.gssn_member_status = 'non-member';
+            end
         end
         
         function obj = update(obj, t, total_objects, gssn_objects, fee, econParams)
@@ -132,6 +150,7 @@ classdef NationAgent
             obj.data.revenue(tIdx) = obj.revenue;
             obj.data.cost(tIdx) = obj.total_cost;
             obj.data.sensorStatus{tIdx} = obj.sensor_con_status;
+            obj.data.gssnMemberStatus{tIdx} = obj.gssn_member_status;
 
         end
         
@@ -336,6 +355,12 @@ classdef NationAgent
             retireEvents = sum(retireEventsIdx);
             obj.satellites = obj.satellites - retireEvents;
             obj.sat_retire(retireEventsIdx) = [];
+        end
+        
+        function obj = reset_gssn_waits(obj)
+            obj.gssn_entry_wait = 0;
+            obj.gssn_leave_wait = 0;
+            obj.gssn_kick_wait = 0;
         end
     end
 end
