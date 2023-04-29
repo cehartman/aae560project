@@ -11,14 +11,14 @@ econParams.sensorDiscount = 0;
 econParams.sensorPenalty = 0;
 
 
-initialSensorsRange = [5 5];
+initialSensorsRange = [10 10];
 baseSensorCapability = 500;
 sensorReqRateStats = [1 0]; % years
 sensorConSpeedStats = [3 0]; % years
-dataQualityStats = [randi([10 10])/10 0.0];
+dataQualityStats = [randi([6 10])/10 0.2];
 initialSatsRange = [160 160]; 
-initialGssnMemberChance = 0.4;
-launchRateStats = [5.5 0.0]; % mean launch rate (sat/year)
+initialGssnMemberChance = 0.5;
+launchRateStats = [10 0.0]; % mean launch rate (sat/year)
 
 nationParams.sensors = randi(initialSensorsRange);
 nationParams.sensor_capability = baseSensorCapability;
@@ -34,5 +34,5 @@ nationParams.gssn_member = rand(1) <= initialGssnMemberChance;
 nationParams.fuzz = 1.0; % 1.0 = no fuzz, 0.0 = full fuzz
 nationParams.starting_budget = randi(econParams.nationalBudgetsRange);
 nationParams.nsat = randi(initialSatsRange);
-nationParams.sat_life = 8*365.2425; % days
+nationParams.sat_life = 8*365.2425; % years->days
 nationParams.launch_rate = normrnd(launchRateStats(1),launchRateStats(2))/365.2425*timeStep;
