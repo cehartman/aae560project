@@ -19,7 +19,7 @@ ax.YAxis.Exponent = 0;
 title('Tracking');
 xlabel('Time (Years)','FontWeight','Bold');
 ylabel('Objects','FontWeight','Bold');
-lgdStr = strcat({'Nation '},strsplit(num2str(1:10)),{' Tracking Capacity'});
+lgdStr = strcat({'Nation '},strsplit(num2str(1:length(gssa_model.nations))),{' Tracking Capacity'});
 legend([{'Debris','GSSN Tracking Capacity'},lgdStr]);
 
 % Total Debris
@@ -49,7 +49,7 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]);
 xlabel('Time (Years)','FontWeight','Bold');
 title('Total Number of Sensors');
 ylabel('Sensors','FontWeight','Bold');
-lgdStr = strcat({'Nation '},strsplit(num2str(1:10)),{' Sensors'});
+lgdStr = strcat({'Nation '},strsplit(num2str(1:length(gssa_model.nations))),{' Sensors'});
 legend([{'Combined GSSN Sensors'},lgdStr]);
 
 % Sensor Status
@@ -78,7 +78,7 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 max(gssa_model.le
 xlabel('Time (Years)','FontWeight','Bold');
 title('Total Satellites');
 ylabel('Satellites','FontWeight','Bold');
-lgdStr = strcat({'Nation '},strsplit(num2str(1:10)),{' Satellites'});
+lgdStr = strcat({'Nation '},strsplit(num2str(1:length(gssa_model.nations))),{' Satellites'});
 legend([{'LEO Satellites'},lgdStr]);
 
 % Tracking Success Probability
@@ -92,7 +92,7 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 1.5];
 xlabel('Time (Years)','FontWeight','Bold');
 title('Tracking Success Probability');
 ylabel('Tracking Success Probability','FontWeight','Bold');
-lgdStr = strcat({'Nation '},strsplit(num2str(1:10)));
+lgdStr = strcat({'Nation '},strsplit(num2str(1:length(gssa_model.nations))));
 legend([{'GSSN'},lgdStr]);
 
 % Total Budget
@@ -104,7 +104,7 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]);
 xlabel('Time (Years)','FontWeight','Bold');
 title('Budget');
 ylabel('$ (Billions)','FontWeight','Bold');
-lgdStr = strcat({'Nation '},strsplit(num2str(1:10)));
+lgdStr = strcat({'Nation '},strsplit(num2str(1:length(gssa_model.nations))));
 legend(lgdStr);
 
 % Total Revenue
@@ -116,7 +116,7 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]);
 xlabel('Time (Years)','FontWeight','Bold');
 title('Revenue');
 ylabel('$ (Billions)','FontWeight','Bold');
-lgdStr = strcat({'Nation '},strsplit(num2str(1:10)));
+lgdStr = strcat({'Nation '},strsplit(num2str(1:length(gssa_model.nations))));
 legend(lgdStr);
 
 % Total Cost
@@ -128,7 +128,7 @@ ax = gca; ax.XLim = round([xData(1) xData(end)]);
 xlabel('Time (Years)','FontWeight','Bold');
 title('Cost');
 ylabel('$ (Billions)','FontWeight','Bold');
-lgdStr = strcat({'Nation '},strsplit(num2str(1:10)));
+lgdStr = strcat({'Nation '},strsplit(num2str(1:length(gssa_model.nations))));
 legend(lgdStr);
 
 % GSSN Membership
