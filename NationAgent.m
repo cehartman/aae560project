@@ -16,7 +16,7 @@ classdef NationAgent
         sat_proc_cost
         sat_revenue
         gssn_member % bool
-        fuzzing % bool
+        fuzz_factor % bool
         tech_cap % technological capability (mean and std dev)
         sensor_data_quality %array of sensor data qualities
         nation_data_quality %nation data quality (avg of sensor data qualities)
@@ -61,7 +61,7 @@ classdef NationAgent
             obj.sensor_tracking_capacity = sc*obj.sensor_data_quality;
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
             obj.gssn_member = gm;
-            obj.fuzzing = fuzz;
+            obj.fuzz_factor = fuzz;
             obj.revenue = 0; % from successful space operations (acrued each time step per satellite)
             obj.total_cost = 0; % from sensor construction, sensor operation, etc
             obj.need_sensor = 0; %binary 0 = does not need sensor, 1 = need sensor
@@ -108,6 +108,7 @@ classdef NationAgent
                 end
             end
 
+            % nation evaluates whether it wants to be in the GSSN
             obj = obj.gssn_desire(fee,total_objects);
 
             %if the agent does not want to be part of the gssn but does 
@@ -126,7 +127,7 @@ classdef NationAgent
                 end
             end
             
-            %update tracking capacity
+            % update tracking capacity
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
 
             % launch and retire satellite(s) (maybe)
@@ -238,11 +239,6 @@ classdef NationAgent
                 end
             end
         end
-        
-%        function obj = fuzzing_decision(obj)
-%             % nation decides whether or not to fuzz their data 
-%             
-%         end
         
         function obj = update_economic_conditions(obj,econParams)
             % "The SoS model also needs to support the injection of events 

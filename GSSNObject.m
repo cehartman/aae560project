@@ -39,7 +39,7 @@ classdef GSSNObject
             sum = 0;
             sumSens = 0;
             for i = 1:obj.num_nations
-                sum = sum + obj.nations{i}.tracking_capacity;
+                sum = sum + obj.nations{i}.tracking_capacity*obj.nations{i}.fuzz_factor;
                 sumSens = sumSens + obj.nations{i}.n_sensors;
             end
 
