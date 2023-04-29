@@ -16,7 +16,7 @@ classdef NationAgent
         sat_proc_cost
         sat_revenue
         gssn_member % bool
-        fuzzing % bool
+        fuzz_factor % bool
         tech_cap % technological capability (mean and std dev)
         sensor_data_quality %array of sensor data qualities
         nation_data_quality %nation data quality (avg of sensor data qualities)
@@ -61,7 +61,7 @@ classdef NationAgent
             obj.sensor_tracking_capacity = sc*obj.sensor_data_quality;
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
             obj.gssn_member = gm;
-            obj.fuzzing = fuzz;
+            obj.fuzz_factor = fuzz;
             obj.revenue = 0; % from successful space operations (acrued each time step per satellite)
             obj.total_cost = 0; % from sensor construction, sensor operation, etc
             obj.need_sensor = 0; %binary 0 = does not need sensor, 1 = need sensor
@@ -108,6 +108,7 @@ classdef NationAgent
                 end
             end
 
+            % nation evaluates whether it wants to be in the GSSN
             obj = obj.gssn_desire(fee,total_objects);
 
             %if the agent does not want to be part of the gssn but does 
@@ -120,13 +121,13 @@ classdef NationAgent
 %             if obj.want_gssn == 0 && 
             if obj.need_sensor == 1 ...
                     && obj.budget >= (obj.sensor_manu_cost + obj.sensor_oper_cost)
-                obj = obj.add_sensor();
+                obj = obj.add_sensor(econParams);
                 if obj.wait_con == 0
                     disp(['Nation ' num2str(obj.id) ' added sensor at year ' num2str(years(days(t)))]);
                 end
             end
             
-            %update tracking capacity
+            % update tracking capacity
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
 
             % launch and retire satellite(s) (maybe)
@@ -169,7 +170,7 @@ classdef NationAgent
             %the agent has now expressed a desire for a new sensor or not
         end
         
-        function obj = add_sensor(obj)
+        function obj = add_sensor(obj,econParams)
             % if nation desires to add a sensor, and does not join the SSA to meet tracking needs,
             % this method tracks how long the agent has been waiting for
             % the sensor to be built
@@ -184,6 +185,7 @@ classdef NationAgent
                 obj.total_cost = obj.total_cost + obj.sensor_manu_cost;
                 obj.budget = obj.budget - obj.sensor_manu_cost;
                 obj.n_sensors = obj.n_sensors + 1;
+                obj.sensor_manu_cost = max(obj.sensor_manu_cost - econParams.sensorDiscount,600);
                 
                 %add sensor with a random data quality
                 sdq = normrnd(obj.tech_cap(1),obj.tech_cap(2));
@@ -239,11 +241,6 @@ classdef NationAgent
             end
         end
         
-%        function obj = fuzzing_decision(obj)
-%             % nation decides whether or not to fuzz their data 
-%             
-%         end
-        
         function obj = update_economic_conditions(obj,econParams)
             % "The SoS model also needs to support the injection of events 
             % that shape the economic or political conditions under which 
@@ -258,7 +255,7 @@ classdef NationAgent
             %budget based on standard normal distribution
             
             obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0.5,1); % TODO: decide on budget fluctuation
-            obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
+            obj.sensor_manu_cost = min(obj.sensor_manu_cost+econParams.sensorPenalty,2000)*econParams.inflation;
             obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
             obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;
             obj.sat_proc_cost = obj.sat_proc_cost*econParams.inflation;
