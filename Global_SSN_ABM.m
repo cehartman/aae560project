@@ -11,6 +11,8 @@
 clear; close all; clc; rng(3);
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
 
+addpath('Utilities');
+
 %TODO: remove this when we're ready
 global enable_environment_updates;
 global environment_updates_only;
