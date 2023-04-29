@@ -9,6 +9,7 @@ classdef GSSNObject
         num_objects
         nations
         min_data_quality %this is an input to test our hypothesis
+        feeCoeff
         fee
         decision
         data
@@ -16,14 +17,15 @@ classdef GSSNObject
     end
 
     methods
-        function obj = GSSNObject(nn, dq, cost, timeStep, timeVec)
+        function obj = GSSNObject(nn, dq, gssnFeeCoeff, timeStep, timeVec)
             % initialize GSSN object
 
             obj.num_nations = nn;
             obj.num_objects = 0; 
             obj.min_data_quality = dq;
             obj.nations = {}; 
-            obj.fee = cost;
+            obj.feeCoeff = gssnFeeCoeff;
+            obj.fee = 0;
             obj.timeStep = timeStep;
             
             % initialize GSSN data storage
@@ -31,23 +33,29 @@ classdef GSSNObject
             obj.data.total_members_cum(1) = nn;
             obj.data.tracking_capacity = zeros(1,length(timeVec));
             obj.data.combined_sensors = zeros(1,length(timeVec));
+            obj.data.fee = zeros(1,length(timeVec));
 
         end
         
         function obj = update(obj,t)
 
+            % determine number of total objects tracked by GSSN
             sum = 0;
             sumSens = 0;
             for i = 1:obj.num_nations
                 sum = sum + obj.nations{i}.tracking_capacity*obj.nations{i}.fuzz_factor;
                 sumSens = sumSens + obj.nations{i}.n_sensors;
             end
-
             obj.num_objects = sum;
             
+            % determine current GSSN membership fee
+            obj.fee = obj.feeCoeff(1) + obj.feeCoeff(2)*obj.num_nations;
+            
+            % update data
             obj.data.total_members_cum(t/obj.timeStep+1) = obj.num_nations;
             obj.data.tracking_capacity(t/obj.timeStep+1) = sum;
             obj.data.combined_sensors(t/obj.timeStep+1) = sumSens;
+            obj.data.fee(t/obj.timeStep+1) = obj.fee;
         end
         
         

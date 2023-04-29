@@ -20,7 +20,7 @@ environment_updates_only = 0;
 % Initialize Adjustable Parameters / Design Variables
 n_nations = 10;
 minGssnDQ = 0.8;
-gssnFee   = 2000; % million $ / year
+gssnFeeCoeff = [800 0]; % million $ / year
 
 % Time
 simTime = 100; % [years]
@@ -36,7 +36,7 @@ gssa_model = GlobalSSAModel(timeVec,timeStep,envParams);
 
 %Add GSSN object 
 %inputs: nn, dq, cost
-gssn = GSSNObject(0, minGssnDQ, gssnFee, timeStep, timeVec);
+gssn = GSSNObject(0, minGssnDQ, gssnFeeCoeff, timeStep, timeVec);
 
 gssa_model = gssa_model.add_gssn(gssn);
 

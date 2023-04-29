@@ -7,6 +7,8 @@ econParams.newSensorCost = 1600; % million $ from Space Fence
 econParams.sensorOpCost = 6;    % million $ / year from $33m/5yrs for SF
 econParams.inflation = 1.0; % negate inflation; not relevant to RQs
 econParams.nationalBudgetsRange = [500 5000]; % million $
+econParams.sensorDiscount = 0;
+econParams.sensorPenalty = 0;
 
 
 initialSensorsRange = [5 5];

@@ -121,7 +121,7 @@ classdef NationAgent
 %             if obj.want_gssn == 0 && 
             if obj.need_sensor == 1 ...
                     && obj.budget >= (obj.sensor_manu_cost + obj.sensor_oper_cost)
-                obj = obj.add_sensor();
+                obj = obj.add_sensor(econParams);
                 if obj.wait_con == 0
                     disp(['Nation ' num2str(obj.id) ' added sensor at year ' num2str(years(days(t)))]);
                 end
@@ -170,7 +170,7 @@ classdef NationAgent
             %the agent has now expressed a desire for a new sensor or not
         end
         
-        function obj = add_sensor(obj)
+        function obj = add_sensor(obj,econParams)
             % if nation desires to add a sensor, and does not join the SSA to meet tracking needs,
             % this method tracks how long the agent has been waiting for
             % the sensor to be built
@@ -185,6 +185,7 @@ classdef NationAgent
                 obj.total_cost = obj.total_cost + obj.sensor_manu_cost;
                 obj.budget = obj.budget - obj.sensor_manu_cost;
                 obj.n_sensors = obj.n_sensors + 1;
+                obj.sensor_manu_cost = max(obj.sensor_manu_cost - econParams.sensorDiscount,600);
                 
                 %add sensor with a random data quality
                 sdq = normrnd(obj.tech_cap(1),obj.tech_cap(2));
@@ -254,7 +255,7 @@ classdef NationAgent
             %budget based on standard normal distribution
             
             obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0.5,1); % TODO: decide on budget fluctuation
-            obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
+            obj.sensor_manu_cost = min(obj.sensor_manu_cost+econParams.sensorPenalty,2000)*econParams.inflation;
             obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
             obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;
             obj.sat_proc_cost = obj.sat_proc_cost*econParams.inflation;
