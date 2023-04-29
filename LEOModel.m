@@ -69,13 +69,24 @@ classdef LEOModel
             finalIndependentSats           = independentSats - newIndependentCollisions;
             obj.data.totalCollisions(tIdx) = obj.data.totalCollisions(tIdx) + newIndependentCollisions;
             
+            % for independent collisions, randomly select nation to build new sensor
+            gssnMemberNations   = cellfun(@(x) x.gssn_member, nations) == 1;
+            currentAvailNations = cellfun(@(x) x.wait_con, nations) == 0;
+            nonCollisionNations = ~cellfun(@(x) x.collision_occurred, nations);
+            elligibleNations    = gssnMemberNations & currentAvailNations & nonCollisionNations;
+            if newIndependentCollisions > 0 && any(elligibleNations)
+                selectedNation      = randsample(find(elligibleNations),1);
+                nations{selectedNation}.collision_occurred = true;
+            end
+            
             % update total debris
             obj.numDebris = obj.numDebris + newDebris;
             obj.data.totalDebris(tIdx) = obj.numDebris;
             
             % update total LEO satellites
+            independentLaunchEvents = round(normrnd(obj.params.leoLaunchRate,0.5));
             finalNationSats        = sum(cellfun(@(x) x.satellites, nations));
-%             obj.params.leoSats     = finalNationSats + finalIndependentSats;
+%             obj.params.leoSats     = finalNationSats + finalIndependentSats + independentLaunchEvents;
             obj.data.leoSats(tIdx) = obj.params.leoSats;
         end
         

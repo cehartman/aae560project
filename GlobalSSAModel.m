@@ -40,14 +40,14 @@ classdef GlobalSSAModel
         function obj = add_to_gssn(obj, nation,id)
 
             obj.gssn = obj.gssn.add_nation(nation);
-            obj.nations{1,id}.gssn_member = 1;
+            obj.nations{1,id}.gssn_member = true;
             obj.n_members = obj.n_members + 1;
 
         end
 
         function obj = remove_from_gssn(obj, nation,id)
             obj.gssn = obj.gssn.remove_nation(nation);
-            obj.nations{1,id}.gssn_member = 0;
+            obj.nations{1,id}.gssn_member = false;
             obj.n_members = obj.n_members - 1;
 
         end
@@ -88,42 +88,42 @@ classdef GlobalSSAModel
 
                 if mod(t,365.2425) < obj.nations{1,1}.timeStep
                     for i = 1:obj.n_nations
-
+                        
                         [obj, decision] = obj.eval_nation(obj.nations{1,i});
-
+                        
                         %if a nation wants to be in the gssn but isn't
                         %currently, and the gssn will let them in, add them
                         if obj.nations{1,i}.want_gssn == 1 && ...
-                                obj.nations{1,i}.gssn_member == 0 && ...
+                                ~obj.nations{1,i}.gssn_member && ...
                                 decision == 1
                             obj = obj.add_to_gssn(obj.nations{1,i}, i);
-
+                            
                         end
-
+                        
                         %if a nation wants out, let them out
                         if obj.nations{1,i}.want_gssn == 0 &&...
-                                obj.nations{1,i}.gssn_member == 1
+                                obj.nations{1,i}.gssn_member
                             obj = obj.remove_from_gssn(obj.nations{1,i}, i);
                         end
-
+                        
                         %if a nation wants to be a member, is currently a
                         %member, but the GSSN rejects them, remove them
-                        if obj.nations{1,i}.gssn_member == 1 && ...
+                        if obj.nations{1,i}.gssn_member && ...
                                 obj.nations{1,i}.want_gssn == 1 &&...
                                 decision == 0
                             obj = obj.remove_from_gssn(obj.nations{1,i}, i);
                         end
-
-                        if obj.nations{1,i}.gssn_member == 1 && ...
+                        
+                        if obj.nations{1,i}.gssn_member && ...
                                 obj.nations{1,i}.want_gssn == 0 &&...
                                 decision == 0
                             obj = obj.remove_from_gssn(obj.nations{1,i}, i);
                         end
                     end
                 end
+                
                 % update GSSN object
                 obj.gssn = obj.gssn.update(t);
-
             end
         end
     end

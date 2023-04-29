@@ -62,7 +62,7 @@ for iNation = 1:n_nations
 
     gssa_model = gssa_model.add_nation(newNation); % supply inputs 
 
-    if newNation.gssn_member == 1
+    if newNation.gssn_member == true
         gssa_model = gssa_model.add_to_gssn(newNation, iNation);
     end
  
