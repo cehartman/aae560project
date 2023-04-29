@@ -26,7 +26,7 @@ classdef GSSNObject
             obj.num_nations = nn;
             obj.num_objects = 0; 
             obj.min_data_quality = dq;
-            obj.nations = {}; 
+            obj.nations = []; 
             obj.feeCoeff = gssnFeeCoeff;
             obj.fee = 0;
             obj.timeStep = timeStep;
@@ -43,14 +43,14 @@ classdef GSSNObject
 
         end
         
-        function obj = update(obj,t)
+        function obj = update(obj,nations,t)
 
             % determine number of total objects tracked by GSSN
             sum = 0;
             sumSens = 0;
             for i = 1:obj.num_nations
-                sum = sum + obj.nations{i}.tracking_capacity*obj.nations{i}.fuzz_factor;
-                sumSens = sumSens + obj.nations{i}.n_sensors;
+                sum = sum + nations{i}.tracking_capacity*nations{i}.fuzz_factor;
+                sumSens = sumSens + nations{i}.n_sensors;
             end
             obj.num_objects = sum;
             
@@ -87,7 +87,7 @@ classdef GSSNObject
             obj.num_nations = obj.num_nations + 1;
 
             %add nation to the end of the list
-            obj.nations{1,end+1} = nation;
+            obj.nations(end+1) = nation.id;
 
             obj.num_objects = obj.num_objects + nation.tracking_capacity;
 
@@ -96,16 +96,13 @@ classdef GSSNObject
         function obj = remove_nation(obj,nation)
 
             %delete the nation from the list
-            obj.nations{nation.id} = {};
+            obj.nations(obj.nations == nation.id) = [];
 
             %reduce number of nations by 1
             obj.num_nations = obj.num_nations - 1;
             obj.num_objects = obj.num_objects - nation.tracking_capacity;
             
             %TODO: update data quality
-
-            %delete the empty cell of the nation removed
-            obj.nations = obj.nations(~cellfun('isempty',obj.nations));
 
         end
 
