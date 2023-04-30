@@ -56,21 +56,21 @@ classdef GlobalSSAModel
             % triggers the GSSN to evaluate a nation's eligibility 
             [obj.gssn, decision] = obj.gssn.evaluate(nation);
         end
- 
+        
+        % commands the model to advance a time step
         function obj = timestep(obj,t,econParams)
             global enable_environment_updates
             global environment_updates_only
-            % commands the model to advance a time step
-
+            
+            %STEP 1: Update Environment
             if enable_environment_updates % TODO: remove
-
-                %STEP 1: Update Environment
                 [obj.leo_environment,obj.nations] = obj.leo_environment.update(t,obj.nations,obj.gssn);
                 total_objects = obj.leo_environment.numDebris;
             else
                 total_objects = 8000;
             end
-
+            
+            %STEP 1: Update Agents
             if ~environment_updates_only % TODO: remove
                 %STEP 2: Update Nation Preferences
                 for i = 1:obj.n_nations

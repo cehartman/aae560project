@@ -9,17 +9,18 @@ function gssa_model = Global_SSN_ABM_MCDriver(numMC,n_nations,minGssnDQ)
 % Surveillance Network (SSN) Agent Based Model (ABM) and evaluates output
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fclose all; close all; %clearvars; clc
+% fclose all; close all; %clearvars; clc
 
 fixRndSeed = false;
-all_gssa_models = cell(numMC,1);
-for iMC = 1:numMC
-    all_gssa_models{iMC} = Global_SSN_ABM(fixRndSeed,n_nations,minGssnDQ);
+all_gssa_models = cell(1,numMC);
+parfor iMC = 1:numMC
+    fprintf('\tProcessing MC %d\n',iMC);
+    all_gssa_models{1,iMC} = Global_SSN_ABM(fixRndSeed,n_nations,minGssnDQ);
 end
 close all;
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
 
-timeVec = all_gssa_models{iMC}.leo_environment.timeVec;
+timeVec = all_gssa_models{1}.leo_environment.timeVec;
 % n_nations = all_gssa_models{iMC}.n_nations;
 
 % Re-create data structures

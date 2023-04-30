@@ -19,7 +19,7 @@ if nargin < 3
     minGssnDQ = 0.6;
 end
 % clear;
-close all; clc;
+% close all; clc;
 if fixRndSeed
     rng(3);
 end
