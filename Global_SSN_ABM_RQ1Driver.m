@@ -23,10 +23,8 @@ tic;
 % Initialize Parameters
 numMC = 10;
 n_nations = 10;
-minGssnDQ = 0:0.2:1.0;
+minGssnDQ = 0:0.1:1.0;
 timeStep = 8; % [days] %NOTE: this is also set independently at a lower level
-
-allNationParams(n_nations) = struct();
 
 % Econ params are always the same for each nation
 econParams.newSatCost = 171;    % million $ from OP
@@ -38,7 +36,7 @@ econParams.inflation = 1.0; % negate inflation; not relevant to RQs
 econParams.sensorDiscount = 0;
 econParams.sensorPenalty = 0;
 
-% set fixed nation parameters
+% Set Fixed Nation Parameters
 allNationParams(n_nations) = struct();
 for iNat = 1:n_nations
     allNationParams(iNat).nationParams = Global_SSN_ABM_NationParams_Static(econParams,timeStep,iNat);
@@ -49,7 +47,7 @@ all_gssa_models = cell(size(minGssnDQ));
 parfor iDQ = 1:length(minGssnDQ)
     fprintf('Processing DV minGssnDQ = %.1f\n',minGssnDQ(1,iDQ));
     
-    % Run Monte Carlo Simulations
+    % Run Monte Carlo Simulations for Current DV Setting
     all_gssa_models{1,iDQ} = Global_SSN_ABM_MCDriver(numMC,allNationParams,econParams,minGssnDQ(iDQ));
 end
 

@@ -10,18 +10,22 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fclose all; close all; clearvars; clc; rng('default');
 
-% test parameters
-numMC = 1;
+% Initialize Parallel Computing
+try
+    delete(gcp('nocreate'));
+    parpool(8);
+catch err
+    disp(err.message);
+end
+
+tic;
+
+% Initialize Parameters
+numMC = 10;
 n_nations = 10;
 minGssnDQ = 0.6;
-nat1TechCapabilityScale = [0.5:0.25:3.0];
+nat1TechCapabilityScale = 0.5:0.5:4.0;
 timeStep = 8; % [days] %NOTE: this is also set independently at a lower level
-
-% initialize data storage
-minGssnTrackingSuccessProb = zeros(size(nat1TechCapabilityScale));
-avgGssnMembership = zeros(size(nat1TechCapabilityScale));
-all_gssa_models = cell(length(nat1TechCapabilityScale),1);
-allNationParams(n_nations) = struct();
 
 % Econ params are always the same for each nation
 econParams.newSatCost = 171;    % million $ from OP
@@ -33,50 +37,60 @@ econParams.inflation = 1.0; % negate inflation; not relevant to RQs
 econParams.sensorDiscount = 0;
 econParams.sensorPenalty = 0;
 
-% set fixed nation parameters (nation 1's SC changed later)
+% Set Fixed Nation Parameters (nation 1's SC changed later)
 allNationParams(n_nations) = struct();
 for iNat = 1:n_nations
     allNationParams(iNat).nationParams = Global_SSN_ABM_NationParams_Static(econParams,timeStep,iNat);
 end
 
-% iterate over nation 1 sensor capability DV
+% Change Nation 1's Technological Capabilities
+allNationParamsDV = repmat({allNationParams},size(nat1TechCapabilityScale));
 for iTC = 1:length(nat1TechCapabilityScale)
-    
-    curFactor = nat1TechCapabilityScale(iTC);
-    % update nation 1's tech capabilities for the current DV iteration
-    allNationParams(1).nationParams.sensor_capability = allNationParams(1).nationParams.sensor_capability*curFactor;
-    allNationParams(1).nationParams.sensor_const_speed = allNationParams(1).nationParams.sensor_const_speed*(1/curFactor);
-    allNationParams(1).nationParams.sensor_mfg_cost = allNationParams(1).nationParams.sensor_capability*(1/curFactor);
-    
-    % run MC simulation for current DV setting
-    gssa_model = Global_SSN_ABM_MCDriver(numMC,allNationParams,econParams,minGssnDQ);
-    gssnTrackingSuccessProb = gssa_model.gssn.data.tracking_capacity ./ gssa_model.leo_environment.data.totalDebris;
-    minGssnTrackingSuccessProb(iTC) = min(gssnTrackingSuccessProb);
-    avgGssnMembership(iTC) = mean(gssa_model.gssn.data.total_members_cum);
-    avgNation1GssnMembership(iTC,:) = mean(gssa_model.nations{1}.data.gssnMembership,1);
-    
-    % store gssa_model
-    all_gssa_models{iTC} = gssa_model;
+    curFactor = nat1TechCapabilityScale(1,iTC);
+    allNationParamsDV{1,iTC}(1).nationParams.sensor_capability = allNationParams(1).nationParams.sensor_capability*curFactor;
+    allNationParamsDV{1,iTC}(1).nationParams.sensor_const_speed = allNationParams(1).nationParams.sensor_const_speed*(1/curFactor);
+    allNationParamsDV{1,iTC}(1).nationParams.sensor_mfg_cost = allNationParams(1).nationParams.sensor_capability*(1/curFactor);
 end
 
-% Min GSSN Tracking Success Probability vs Nation 1 Sensor Capability
+% Design Variable Loop
+% Iterate Over Nation 1 Technological Capability DV
+all_gssa_models = cell(size(nat1TechCapabilityScale));
+parfor iTC = 1:length(nat1TechCapabilityScale)
+    fprintf('Processing DV nat1TechCapabilityScale = %.1f\n',nat1TechCapabilityScale(1,iTC));
+    
+    % Run Monte Carlo Simulations for Current DV Setting
+    all_gssa_models{1,iTC} = Global_SSN_ABM_MCDriver(numMC,allNationParamsDV{1,iTC},econParams,minGssnDQ);
+end
+
+% Calculate Performance Metrics
+minGssnTrackingSuccessProb = zeros(size(nat1TechCapabilityScale));
+avgGssnMembership = zeros(size(nat1TechCapabilityScale));
+for iTC = 1:length(nat1TechCapabilityScale)
+    % GSSN Tracking Capacity
+    gssnTrackingSuccessProb = all_gssa_models{1,iTC}.gssn.data.tracking_capacity ./ all_gssa_models{1,iTC}.leo_environment.data.totalDebris;
+    minGssnTrackingSuccessProb(1,iTC) = min(gssnTrackingSuccessProb);
+    avgGssnMembership(1,iTC) = mean(all_gssa_models{1,iTC}.gssn.data.total_members_cum);
+    avgNation1GssnMembership(iTC,:) = mean(all_gssa_models{1,iTC}.nations{1}.data.gssnMembership,1);
+end
+
+% Min GSSN Tracking Success Probability vs Nation 1 Technological Capability
 figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
 yline(1.0,'g--','LineWidth',1.5);
 yline(1.2,'b--','LineWidth',1.5);
 plot(nat1TechCapabilityScale,minGssnTrackingSuccessProb,'k*');
 title('');
-xlabel('Nation 1 Tech Multiplier','FontWeight','Bold');
+xlabel('Nation 1 Technological Capability Multiplier','FontWeight','Bold');
 ylabel('Minimum GSSN Tracking Success Probability','Fontweight','Bold');
 legend({'100% Tracking Capacity Performance Requirement','120% Tracking Capacity Design Goal'},'Location','NorthEast');
 
-% Avg GSSN Membership vs Nation 1 Sensor Capability
+% Avg GSSN Membership vs Nation 1 Technological Capability
 figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
 plot(nat1TechCapabilityScale,avgGssnMembership,'k*');
 title('');
-xlabel('Nation 1 Tech Multiplier','FontWeight','Bold');
+xlabel('Nation 1 Technological Capability Multiplier','FontWeight','Bold');
 ylabel('Average GSSN Membership','Fontweight','Bold');
 
-% Average GSSN Membership OverTime for Nation 1 vs Nation 1 Sensor Capability                             
+% Nation 1 Average GSSN Membership Over Time per Nation 1 Technological Capability                             
 plot_colors = distinguishable_colors(length(nat1TechCapabilityScale),'w');
 timeVec  = 0:timeStep:100*365.2425;    % Simulation time steps [days]
 xData = years(days(timeVec));
@@ -88,5 +102,7 @@ title('');
 xlabel('Time (Years)','FontWeight','Bold');
 ylabel('Average Nation 1 GSSN Membership','Fontweight','Bold');
 ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 1.1];
-lgdStr = strcat({'Tech Multiplier '},strsplit(num2str(nat1TechCapabilityScale)));
+lgdStr = strcat({'Technological Capability Multiplier '},strsplit(num2str(nat1TechCapabilityScale)));
 legend(lgdStr,'location','northeastoutside');
+
+toc;

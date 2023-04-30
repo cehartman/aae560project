@@ -295,7 +295,7 @@ classdef NationAgent
                 %take the budget, and add or subtract a percentage of the
                 %budget based on standard normal distribution
                 obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0.5,1);
-                obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
+                obj.sensor_manu_cost = min(obj.sensor_manu_cost+econParams.sensorPenalty,2000)*econParams.inflation;
                 obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
                 obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;
                 obj.sat_proc_cost = obj.sat_proc_cost*econParams.inflation;
