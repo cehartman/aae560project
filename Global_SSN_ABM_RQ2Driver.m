@@ -63,32 +63,60 @@ parfor iTC = 1:length(nat1TechCapabilityScale)
 end
 
 % Calculate Performance Metrics
+avgGssnTrackingSuccessProb = zeros(size(nat1TechCapabilityScale));
 minGssnTrackingSuccessProb = zeros(size(nat1TechCapabilityScale));
+maxGssnTrackingSuccessProb = zeros(size(nat1TechCapabilityScale));
+stdGssnTrackingSuccessProb = zeros(size(nat1TechCapabilityScale));
 avgGssnMembership = zeros(size(nat1TechCapabilityScale));
+minGssnMembership = zeros(size(nat1TechCapabilityScale));
+maxGssnMembership = zeros(size(nat1TechCapabilityScale));
+stdGssnMembership = zeros(size(nat1TechCapabilityScale));
 for iTC = 1:length(nat1TechCapabilityScale)
     % GSSN Tracking Capacity
     gssnTrackingSuccessProb = all_gssa_models{1,iTC}.gssn.data.tracking_capacity ./ all_gssa_models{1,iTC}.leo_environment.data.totalDebris;
+    avgGssnTrackingSuccessProb(1,iTC) = mean(gssnTrackingSuccessProb);
     minGssnTrackingSuccessProb(1,iTC) = min(gssnTrackingSuccessProb);
+    maxGssnTrackingSuccessProb(1,iTC) = max(gssnTrackingSuccessProb);
+    stdGssnTrackingSuccessProb(1,iTC) = std(gssnTrackingSuccessProb);
+    
+    % GSSN Membership
     avgGssnMembership(1,iTC) = mean(all_gssa_models{1,iTC}.gssn.data.total_members_cum);
+    minGssnMembership(1,iTC) = min(all_gssa_models{1,iTC}.gssn.data.total_members_cum);
+    maxGssnMembership(1,iTC) = max(all_gssa_models{1,iTC}.gssn.data.total_members_cum);
+    stdGssnMembership(1,iTC) = std(all_gssa_models{1,iTC}.gssn.data.total_members_cum);
     avgNation1GssnMembership(iTC,:) = mean(all_gssa_models{1,iTC}.nations{1}.data.gssnMembership,1);
 end
 
 % Min GSSN Tracking Success Probability vs Nation 1 Technological Capability
 figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
+plot(nat1TechCapabilityScale,avgGssnTrackingSuccessProb,'ko','LineWidth',1.5);
+yneg = avgGssnTrackingSuccessProb - minGssnTrackingSuccessProb;
+ypos = maxGssnTrackingSuccessProb - avgGssnTrackingSuccessProb;
+errorbar(nat1TechCapabilityScale,avgGssnTrackingSuccessProb,yneg,ypos,'k.','LineWidth',1.5);
 yline(1.0,'g--','LineWidth',1.5);
 yline(1.2,'b--','LineWidth',1.5);
-plot(nat1TechCapabilityScale,minGssnTrackingSuccessProb,'k*');
 title('');
 xlabel('Nation 1 Technological Capability Multiplier','FontWeight','Bold');
 ylabel('Minimum GSSN Tracking Success Probability','Fontweight','Bold');
-legend({'100% Tracking Capacity Performance Requirement','120% Tracking Capacity Design Goal'},'Location','NorthEast');
+lgdStr = {'Avg Tracking Success Probability', ...
+    'Min/Max Tracking Success Probability', ...
+    '100% Tracking Capacity Performance Requirement', ...
+    '120% Tracking Capacity Design Goal'};
+legend(lgdStr,'Location','SouthWest');
 
 % Avg GSSN Membership vs Nation 1 Technological Capability
 figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
-plot(nat1TechCapabilityScale,avgGssnMembership,'k*');
+plot(nat1TechCapabilityScale,avgGssnMembership,'ko','LineWidth',1.5);
+yneg = avgGssnMembership - minGssnMembership;
+ypos = maxGssnMembership - avgGssnMembership;
+errorbar(nat1TechCapabilityScale,avgGssnMembership,yneg,ypos,'k.','LineWidth',1.5);
+ax = gca; ax.YLim = [0 10];
 title('');
 xlabel('Nation 1 Technological Capability Multiplier','FontWeight','Bold');
 ylabel('Average GSSN Membership','Fontweight','Bold');
+lgdStr = {'Avg GSSN Membership', ...
+    'Min/Max GSSN Membership'};
+legend(lgdStr,'Location','SouthWest');
 
 % Nation 1 Average GSSN Membership Over Time per Nation 1 Technological Capability                             
 plot_colors = distinguishable_colors(length(nat1TechCapabilityScale),'w');
