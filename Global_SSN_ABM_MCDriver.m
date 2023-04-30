@@ -1,4 +1,4 @@
-function gssa_model = Global_SSN_ABM_MCDriver(numMC,n_nations,minGssnDQ)
+function gssa_model = Global_SSN_ABM_MCDriver(numMC,allNationParams,econParams,minGssnDQ)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Global_SSN_ABM_MCDriver.m
 % AAE 560 - SoS Modeling & Analysis - Project
@@ -11,10 +11,12 @@ function gssa_model = Global_SSN_ABM_MCDriver(numMC,n_nations,minGssnDQ)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fclose all; close all; %clearvars; clc
 
+n_nations = length(allNationParams);
+
 fixRndSeed = false;
 all_gssa_models = cell(numMC,1);
 for iMC = 1:numMC
-    all_gssa_models{iMC} = Global_SSN_ABM(fixRndSeed,n_nations,minGssnDQ);
+    all_gssa_models{iMC} = Global_SSN_ABM(fixRndSeed,allNationParams,econParams,minGssnDQ);
 end
 close all;
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);

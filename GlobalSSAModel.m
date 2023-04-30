@@ -7,7 +7,6 @@ classdef GlobalSSAModel
         n_members
         n_nonmembers
         gssn 
-        n_members_cum
     end
     
     methods

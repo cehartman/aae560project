@@ -1,4 +1,4 @@
-function [gssa_model, finalCollisions, finalDebris] = Global_SSN_ABM(fixRndSeed, n_nations, minGssnDQ)
+function [gssa_model, finalCollisions, finalDebris] = Global_SSN_ABM(fixRndSeed, allNationParams, econParams, minGssnDQ)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Global_SSN_ABM.m
 % AAE 560 - SoS Modeling & Analysis - Project
@@ -14,8 +14,13 @@ if nargin < 1
 end
 if nargin < 2
     n_nations = 10;
+else
+    n_nations = length(allNationParams);
 end
 if nargin < 3
+    [~,econParams] = Global_SSN_ABM_NationParams(0);
+end
+if nargin < 4
     minGssnDQ = 0.6;
 end
 % clear;
@@ -59,9 +64,14 @@ for iNation = 1:n_nations
     % nations, others may be set according to random distributions to make 
     % diverse nations)
     
-    % create nation and add to GSSA model
-    [nationParams, econParams] = Global_SSN_ABM_NationParams(timeStep);
+    % create nation params
+    if ~exist('allNationParams','var')
+        [nationParams, econParams] = Global_SSN_ABM_NationParams(timeStep);
+    else
+        nationParams = allNationParams(iNation).nationParams;
+    end
     
+    % create nation
     newNation = NationAgent(timeVec, timeStep, iNation, ...
         nationParams.sensors, nationParams.sensor_capability, ...
         nationParams.sensor_request_rate, nationParams.sensor_const_speed,...
@@ -73,7 +83,8 @@ for iNation = 1:n_nations
         nationParams.sat_life, nationParams.launch_rate, ...
         nationParams.launchRateIncrease);
 
-    gssa_model = gssa_model.add_nation(newNation); % supply inputs 
+    % add nation to GSSA model
+    gssa_model = gssa_model.add_nation(newNation);
 
     if newNation.gssn_member == true
         gssa_model = gssa_model.add_to_gssn(newNation, iNation);
