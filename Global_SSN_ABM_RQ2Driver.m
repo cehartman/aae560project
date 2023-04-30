@@ -50,6 +50,7 @@ for iSC = 1:length(nat1SensorCapability)
     gssnTrackingSuccessProb = gssa_model.gssn.data.tracking_capacity ./ gssa_model.leo_environment.data.totalDebris;
     minGssnTrackingSuccessProb(iSC) = min(gssnTrackingSuccessProb);
     avgGssnMembership(iSC) = mean(gssa_model.gssn.data.total_members_cum);
+    avgNation1GssnMembership(iSC,:) = mean(gssa_model.nations{1}.data.gssnMembership,1);
     
     % store gssa_model
     all_gssa_models{iSC} = gssa_model;
@@ -71,3 +72,17 @@ plot(nat1SensorCapability,avgGssnMembership,'k*');
 title('');
 xlabel('Nation 1 Sensor Capability','FontWeight','Bold');
 ylabel('Average GSSN Membership','Fontweight','Bold');
+
+% Average GSSN Membership OverTime for Nation 1 vs Nation 1 Sensor Capability                             
+timeVec  = 0:timeStep:100*365.2425;    % Simulation time steps [days]
+xData = years(days(timeVec));
+figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
+for iSC = 1:length(nat1SensorCapability)
+    plot(xData,avgNation1GssnMembership(iSC,:),'LineWidth',2);
+end
+title('');
+xlabel('Time (Years)','FontWeight','Bold');
+ylabel('Average Nation 1 GSSN Membership','Fontweight','Bold');
+ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 1.1];
+lgdStr = strcat({'Sensor Capability '},strsplit(num2str(nat1SensorCapability)));
+legend(lgdStr,'location','northeastoutside');
