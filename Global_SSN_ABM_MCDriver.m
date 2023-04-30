@@ -1,3 +1,4 @@
+function gssa_model = Global_SSN_ABM_MCDriver(numMC,n_nations,minGssnDQ)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Global_SSN_ABM_MCDriver.m
 % AAE 560 - SoS Modeling & Analysis - Project
@@ -8,14 +9,18 @@
 % Surveillance Network (SSN) Agent Based Model (ABM) and evaluates output
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fclose all; close all; clearvars; clc
+fclose all; close all; %clearvars; clc
 
-numMC = 10;
+fixRndSeed = false;
 all_gssa_models = cell(numMC,1);
 for iMC = 1:numMC
-    Global_SSN_ABM;
-    all_gssa_models{iMC} = gssa_model;
+    all_gssa_models{iMC} = Global_SSN_ABM(fixRndSeed,n_nations,minGssnDQ);
 end
+close all;
+F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
+
+timeVec = all_gssa_models{iMC}.leo_environment.timeVec;
+% n_nations = all_gssa_models{iMC}.n_nations;
 
 % Re-create data structures
 % (excludes sensor status and GSSN membership status plots)
@@ -48,19 +53,19 @@ for iMC = 1:numMC
     end
     gssnTotalMembers(iMC,:) = all_gssa_models{iMC}.gssn.data.total_members_cum;
 end
-gssa_model.leo_environment.data.totalDebris = mean(totalDebris);
-gssa_model.gssn.data.tracking_capacity = mean(gssnTrackingCapacity);
-gssa_model.leo_environment.data.totalCollisions = mean(totalCollisions);
-gssa_model.gssn.data.combined_sensors = mean(gssnCombinedSensors);
-gssa_model.leo_environment.data.leoSats = mean(leoSats);
+gssa_model.leo_environment.data.totalDebris = mean(totalDebris,1);
+gssa_model.gssn.data.tracking_capacity = mean(gssnTrackingCapacity,1);
+gssa_model.leo_environment.data.totalCollisions = mean(totalCollisions,1);
+gssa_model.gssn.data.combined_sensors = mean(gssnCombinedSensors,1);
+gssa_model.leo_environment.data.leoSats = mean(leoSats,1);
 for iNation = 1:n_nations
-    gssa_model.nations{iNation}.data.trackingCapacity = mean(squeeze(nationTrackingCapacity(iNation,:,:)));
-    gssa_model.nations{iNation}.data.totalSensors = mean(squeeze(nationTotalSensors(iNation,:,:)));
-    gssa_model.nations{iNation}.data.totalSatellites = mean(squeeze(nationTotalSatellites(iNation,:,:)));
-    gssa_model.nations{iNation}.data.budget = mean(squeeze(nationBudget(iNation,:,:)));
-    gssa_model.nations{iNation}.data.revenue = mean(squeeze(nationRevenue(iNation,:,:)));
-    gssa_model.nations{iNation}.data.cost = mean(squeeze(nationCost(iNation,:,:)));
+    gssa_model.nations{iNation}.data.trackingCapacity = mean(squeeze(nationTrackingCapacity(iNation,:,:)),2);
+    gssa_model.nations{iNation}.data.totalSensors = mean(squeeze(nationTotalSensors(iNation,:,:)),2);
+    gssa_model.nations{iNation}.data.totalSatellites = mean(squeeze(nationTotalSatellites(iNation,:,:)),2);
+    gssa_model.nations{iNation}.data.budget = mean(squeeze(nationBudget(iNation,:,:)),2);
+    gssa_model.nations{iNation}.data.revenue = mean(squeeze(nationRevenue(iNation,:,:)),2);
+    gssa_model.nations{iNation}.data.cost = mean(squeeze(nationCost(iNation,:,:)),2);
 end
-gssa_model.gssn.data.total_members_cum = mean(gssnTotalMembers);
+gssa_model.gssn.data.total_members_cum = mean(gssnTotalMembers,1);
 
-[finalCollisions, finalDebris] = GlobalSSN_AnalysisPlots(gssa_model,timeVec);
+% [finalCollisions, finalDebris] = GlobalSSN_AnalysisPlots(gssa_model,timeVec);

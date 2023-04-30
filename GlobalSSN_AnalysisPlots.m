@@ -39,8 +39,8 @@ ylabel('Debris Objects','FontWeight','Bold');
 figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
 plot(xData,cumulativeCollisions);
 ax = gca; ax.XLim = round([xData(1) xData(end)]);
-xlabel('Time (Years)','FontWeight','Bold');
 title('Total Number of Collisions');
+xlabel('Time (Years)','FontWeight','Bold');
 ylabel('Collisions','FontWeight','Bold');
 
 % Total Sensors
@@ -50,8 +50,8 @@ for iNation = 1:n_nations
     plot(xData,gssa_model.nations{iNation}.data.totalSensors,'Color',nation_colors(iNation,:));
 end
 ax = gca; ax.XLim = round([xData(1) xData(end)]);
-xlabel('Time (Years)','FontWeight','Bold');
 title('Total Number of Sensors');
+xlabel('Time (Years)','FontWeight','Bold');
 ylabel('Sensors','FontWeight','Bold');
 lgdStr = strcat({'Nation '},strsplit(num2str(1:length(gssa_model.nations))));
 legend([{'Combined GSSN'},lgdStr],'location','northeastoutside');
@@ -68,8 +68,8 @@ try
         end
     end
     ax = gca; ax.XLim = round([xData(1) xData(end)]);
-    xlabel('Time (Years)','FontWeight','Bold');
     title('Sensors Status');
+    xlabel('Time (Years)','FontWeight','Bold');
     ylabel('Nation','FontWeight','Bold');
     legend(gssa_model.nations{iNation}.all_status,'location','northeastoutside');
 catch err
@@ -84,8 +84,8 @@ for iNation = 1:n_nations
     plot(xData,gssa_model.nations{iNation}.data.totalSatellites,'Color',nation_colors(iNation,:));
 end
 ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 max(gssa_model.leo_environment.data.leoSats)];
-xlabel('Time (Years)','FontWeight','Bold');
 title('Total Satellites');
+xlabel('Time (Years)','FontWeight','Bold');
 ylabel('Satellites','FontWeight','Bold');
 lgdStr = strcat({'Nation '},strsplit(num2str(1:n_nations)));
 legend([{'LEO Total'},lgdStr],'location','northeastoutside');
@@ -98,8 +98,8 @@ for iNation = 1:n_nations
         gssa_model.nations{iNation}.data.trackingCapacity ./ gssa_model.leo_environment.data.totalDebris,'Color',nation_colors(iNation,:));
 end
 ax = gca; ax.XLim = round([xData(1) xData(end)]);
-xlabel('Time (Years)','FontWeight','Bold');
 title('Tracking Success Probability');
+xlabel('Time (Years)','FontWeight','Bold');
 ylabel('Tracking Success Probability','FontWeight','Bold');
 lgdStr = strcat({'Nation '},strsplit(num2str(1:n_nations)));
 legend([{'GSSN'},lgdStr],'location','northeastoutside');
@@ -110,8 +110,8 @@ for iNation = 1:n_nations
     plot(xData,gssa_model.nations{iNation}.data.budget/1000,'Color',nation_colors(iNation,:));
 end
 ax = gca; ax.XLim = round([xData(1) xData(end)]);
-xlabel('Time (Years)','FontWeight','Bold');
 title('Budget');
+xlabel('Time (Years)','FontWeight','Bold');
 ylabel('$ (Billions)','FontWeight','Bold');
 lgdStr = strcat({'Nation '},strsplit(num2str(1:n_nations)));
 legend(lgdStr,'location','northeastoutside');
@@ -122,8 +122,8 @@ for iNation = 1:n_nations
     plot(xData,gssa_model.nations{iNation}.data.revenue/1000,'Color',nation_colors(iNation,:));
 end
 ax = gca; ax.XLim = round([xData(1) xData(end)]);
-xlabel('Time (Years)','FontWeight','Bold');
 title('Revenue');
+xlabel('Time (Years)','FontWeight','Bold');
 ylabel('$ (Billions)','FontWeight','Bold');
 lgdStr = strcat({'Nation '},strsplit(num2str(1:n_nations)));
 legend(lgdStr,'location','northeastoutside');
@@ -134,8 +134,8 @@ for iNation = 1:n_nations
     plot(xData,gssa_model.nations{iNation}.data.cost/1000,'Color',nation_colors(iNation,:));
 end
 ax = gca; ax.XLim = round([xData(1) xData(end)]);
-xlabel('Time (Years)','FontWeight','Bold');
 title('Cost');
+xlabel('Time (Years)','FontWeight','Bold');
 ylabel('$ (Billions)','FontWeight','Bold');
 lgdStr = strcat({'Nation '},strsplit(num2str(1:n_nations)));
 legend(lgdStr,'location','northeastoutside');
@@ -144,8 +144,8 @@ legend(lgdStr,'location','northeastoutside');
 figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
 plot(xData,gssa_model.gssn.data.total_members_cum);
 ax = gca; ax.XLim = round([xData(1) xData(end)]);
-xlabel('Time (Years)','FontWeight','Bold');
 title('GSSN Membership');
+xlabel('Time (Years)','FontWeight','Bold');
 ylabel('# of Nations','FontWeight','Bold');
 
 % GSSN Membership Status by Nation
@@ -160,8 +160,8 @@ try
         end
     end
     ax = gca; ax.XLim = round([xData(1) xData(end)]);
-    xlabel('Time (Years)','FontWeight','Bold');
     title('GSSN Membership Status');
+    xlabel('Time (Years)','FontWeight','Bold');
     ylabel('Nation','FontWeight','Bold');
     legend(gssa_model.nations{iNation}.all_gssn_member_status,'location','northeastoutside');
 catch err

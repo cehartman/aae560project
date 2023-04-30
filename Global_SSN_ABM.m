@@ -1,3 +1,4 @@
+function [gssa_model, finalCollisions, finalDebris] = Global_SSN_ABM(fixRndSeed, n_nations, minGssnDQ)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Global_SSN_ABM.m
 % AAE 560 - SoS Modeling & Analysis - Project
@@ -8,9 +9,20 @@
 % Surveillance Network (SSN) Agent Based Model (ABM) and evaluates output 
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if nargin < 1
+    fixRndSeed = false;
+end
+if nargin < 2
+    n_nations = 10;
+end
+if nargin < 3
+    minGssnDQ = 0.6;
+end
 % clear;
 close all; clc;
-% rng(3);
+if fixRndSeed
+    rng(3);
+end
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
 
 addpath('Utilities');
@@ -22,8 +34,6 @@ enable_environment_updates = 1;
 environment_updates_only = 0;
 
 % Initialize Adjustable Parameters / Design Variables
-n_nations = 10;
-minGssnDQ = 0.6;
 gssnFeeCoeff = [500 100]; % million $ / year
 wait_times = [1 1 5]; % wait, leave, kick [years]
 
@@ -84,4 +94,4 @@ end
 waitbar(timeVec(end)/timeVec(end),H,'Simulation Complete!');
 
 % generate analysis plots
-[finalCollisions, finalDebris] = GlobalSSN_AnalysisPlots(gssa_model,timeVec);
+% [finalCollisions, finalDebris] = GlobalSSN_AnalysisPlots(gssa_model,timeVec);
