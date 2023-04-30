@@ -58,13 +58,18 @@ gssa_model.gssn.data.tracking_capacity = mean(gssnTrackingCapacity,1);
 gssa_model.leo_environment.data.totalCollisions = mean(totalCollisions,1);
 gssa_model.gssn.data.combined_sensors = mean(gssnCombinedSensors,1);
 gssa_model.leo_environment.data.leoSats = mean(leoSats,1);
+if n_nations == 1
+    dim = 1;
+else
+    dim = 2;
+end
 for iNation = 1:n_nations
-    gssa_model.nations{iNation}.data.trackingCapacity = mean(squeeze(nationTrackingCapacity(iNation,:,:)),2);
-    gssa_model.nations{iNation}.data.totalSensors = mean(squeeze(nationTotalSensors(iNation,:,:)),2);
-    gssa_model.nations{iNation}.data.totalSatellites = mean(squeeze(nationTotalSatellites(iNation,:,:)),2);
-    gssa_model.nations{iNation}.data.budget = mean(squeeze(nationBudget(iNation,:,:)),2);
-    gssa_model.nations{iNation}.data.revenue = mean(squeeze(nationRevenue(iNation,:,:)),2);
-    gssa_model.nations{iNation}.data.cost = mean(squeeze(nationCost(iNation,:,:)),2);
+    gssa_model.nations{iNation}.data.trackingCapacity = mean(squeeze(nationTrackingCapacity(iNation,:,:)),dim);
+    gssa_model.nations{iNation}.data.totalSensors = mean(squeeze(nationTotalSensors(iNation,:,:)),dim);
+    gssa_model.nations{iNation}.data.totalSatellites = mean(squeeze(nationTotalSatellites(iNation,:,:)),dim);
+    gssa_model.nations{iNation}.data.budget = mean(squeeze(nationBudget(iNation,:,:)),dim);
+    gssa_model.nations{iNation}.data.revenue = mean(squeeze(nationRevenue(iNation,:,:)),dim);
+    gssa_model.nations{iNation}.data.cost = mean(squeeze(nationCost(iNation,:,:)),dim);
 end
 gssa_model.gssn.data.total_members_cum = mean(gssnTotalMembers,1);
 
