@@ -21,7 +21,7 @@ if nargin < 3
     [~,econParams] = Global_SSN_ABM_NationParams(0);
 end
 if nargin < 4
-    minGssnDQ = 0.6;
+    minGssnDQ = 0.0;
 end
 % clear;
 % close all; clc;
@@ -82,10 +82,10 @@ for iNation = 1:n_nations
         nationParams.starting_budget, nationParams.nsat, ...
         nationParams.sat_life, nationParams.launch_rate, ...
         nationParams.launchRateIncrease);
-
+    
     % add nation to GSSA model
     gssa_model = gssa_model.add_nation(newNation);
-
+    
     if newNation.gssn_member == true
         gssa_model = gssa_model.add_to_gssn(newNation, iNation);
     end

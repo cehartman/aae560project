@@ -12,7 +12,7 @@ n_nations = length(gssa_model.nations);
 nation_colors = distinguishable_colors(n_nations,'w');
 
 % Total Debris and Tracking Capacity
-figure('Color','w','Position',[600 400 720 420]); hold on; box on; grid on;
+figure('Color','w','Position',[600 400 620 420]); hold on; box on; grid on;
 plot(xData,gssa_model.leo_environment.data.totalDebris,'LineWidth',2);
 plot(xData,gssa_model.gssn.data.tracking_capacity,'LineWidth',2);
 for iNation = 1:n_nations
@@ -29,7 +29,7 @@ legend([{'Debris','GSSN Capacity'},lgdStr],'location','northeastoutside');
 % Total Debris
 figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
 plot(xData,gssa_model.leo_environment.data.totalDebris);
-ax = gca; ax.XLim = round([xData(1) xData(end)]);
+ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim(1) = 0;
 ax.YAxis.Exponent = 0;
 title('Total Number of Debris');
 xlabel('Time (Years)','FontWeight','Bold');

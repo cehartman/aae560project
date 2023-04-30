@@ -69,7 +69,6 @@ classdef GlobalSSAModel
                 total_objects = 8000;
             end
             
-            %STEP 1: Update Agents
             if ~environment_updates_only % TODO: remove
                 %STEP 2: Update Nation Preferences
                 for i = 1:obj.n_nations

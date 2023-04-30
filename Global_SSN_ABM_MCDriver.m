@@ -1,4 +1,4 @@
-function gssa_model = Global_SSN_ABM_MCDriver(numMC,n_nations,minGssnDQ)
+function gssa_model = Global_SSN_ABM_MCDriver(numMC,allNationParams,econParams,minGssnDQ)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Global_SSN_ABM_MCDriver.m
 % AAE 560 - SoS Modeling & Analysis - Project
@@ -9,19 +9,21 @@ function gssa_model = Global_SSN_ABM_MCDriver(numMC,n_nations,minGssnDQ)
 % Surveillance Network (SSN) Agent Based Model (ABM) and evaluates output
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% fclose all; close all; %clearvars; clc
+if nargin < 3
+    minGssnDQ = 0.0;
+end
+n_nations = length(allNationParams);
 
 fixRndSeed = false;
 all_gssa_models = cell(1,numMC);
 parfor iMC = 1:numMC
     fprintf('\tProcessing MC %d\n',iMC);
-    all_gssa_models{1,iMC} = Global_SSN_ABM(fixRndSeed,n_nations,minGssnDQ);
+    all_gssa_models{1,iMC} = Global_SSN_ABM(fixRndSeed,allNationParams,econParams,minGssnDQ);
 end
 close all;
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
 
 timeVec = all_gssa_models{1}.leo_environment.timeVec;
-% n_nations = all_gssa_models{iMC}.n_nations;
 
 % Re-create data structures
 % (excludes sensor status and GSSN membership status plots)
@@ -37,6 +39,7 @@ nationTotalSatellites = zeros(n_nations,numMC,length(timeVec));
 nationBudget = zeros(n_nations,numMC,length(timeVec));
 nationRevenue = zeros(n_nations,numMC,length(timeVec));
 nationCost = zeros(n_nations,numMC,length(timeVec));
+nationMembership = zeros(n_nations,numMC,length(timeVec));
 gssnTotalMembers = zeros(numMC,length(timeVec));
 for iMC = 1:numMC
     totalDebris(iMC,:) = all_gssa_models{iMC}.leo_environment.data.totalDebris;
@@ -51,6 +54,7 @@ for iMC = 1:numMC
         nationBudget(iNation,iMC,:) = all_gssa_models{iMC}.nations{iNation}.data.budget;
         nationRevenue(iNation,iMC,:) = all_gssa_models{iMC}.nations{iNation}.data.revenue;
         nationCost(iNation,iMC,:) = all_gssa_models{iMC}.nations{iNation}.data.cost;
+        nationMembership(iNation,iMC,:) = double(all_gssa_models{iMC}.nations{iNation}.data.gssnMember);
     end
     gssnTotalMembers(iMC,:) = all_gssa_models{iMC}.gssn.data.total_members_cum;
 end
@@ -59,11 +63,11 @@ gssa_model.gssn.data.tracking_capacity = mean(gssnTrackingCapacity,1);
 gssa_model.leo_environment.data.totalCollisions = mean(totalCollisions,1);
 gssa_model.gssn.data.combined_sensors = mean(gssnCombinedSensors,1);
 gssa_model.leo_environment.data.leoSats = mean(leoSats,1);
-if n_nations == 1
+% if n_nations == 1
     dim = 1;
-else
-    dim = 2;
-end
+% else
+%     dim = 2;
+% end
 for iNation = 1:n_nations
     gssa_model.nations{iNation}.data.trackingCapacity = mean(squeeze(nationTrackingCapacity(iNation,:,:)),dim);
     gssa_model.nations{iNation}.data.totalSensors = mean(squeeze(nationTotalSensors(iNation,:,:)),dim);
@@ -71,6 +75,7 @@ for iNation = 1:n_nations
     gssa_model.nations{iNation}.data.budget = mean(squeeze(nationBudget(iNation,:,:)),dim);
     gssa_model.nations{iNation}.data.revenue = mean(squeeze(nationRevenue(iNation,:,:)),dim);
     gssa_model.nations{iNation}.data.cost = mean(squeeze(nationCost(iNation,:,:)),dim);
+    gssa_model.nations{iNation}.data.gssnMembership = squeeze(nationMembership(iNation,:,:));
 end
 gssa_model.gssn.data.total_members_cum = mean(gssnTotalMembers,1);
 

@@ -16,14 +16,13 @@ nationParams.launchRateIncrease = 0.05; % launch rate increase per year
 switch nationId
     case 1
         nationParams.sensors = 10;
-        nationParams.sensor_capability = baseSensorCapability; % gets overwritten later if evaluating RQ2 
+        nationParams.sensor_capability = baseSensorCapability; % gets overwritten later if evaluating RQ2
         nationParams.tech_cap = [0.8000 0.2000]; % [mean stddev]
         nationParams.gssn_member = false;
         nationParams.fuzz = 1.0; % 1.0 = no fuzz, 0.0 = full fuzz
         nationParams.starting_budget = 4534;
         nationParams.nsat = 160;
         nationParams.launch_rate = 10/365.2425*timeStep;
-        
     case 2
         nationParams.sensors = 10;
         nationParams.sensor_capability = baseSensorCapability;
@@ -33,7 +32,6 @@ switch nationId
         nationParams.starting_budget = 4769;
         nationParams.nsat = 160;
         nationParams.launch_rate = 10/365.2425*timeStep;
-        
     case 3
         nationParams.sensors = 10;
         nationParams.sensor_capability = baseSensorCapability;
@@ -43,7 +41,6 @@ switch nationId
         nationParams.starting_budget = 4643;
         nationParams.nsat = 160;
         nationParams.launch_rate = 10/365.2425*timeStep;
-        
     case 4
         nationParams.sensors = 10;
         nationParams.sensor_capability = baseSensorCapability;
@@ -53,7 +50,6 @@ switch nationId
         nationParams.starting_budget = 1779;
         nationParams.nsat = 160;
         nationParams.launch_rate = 10/365.2425*timeStep;
-        
     case 5
         nationParams.sensors = 10;
         nationParams.sensor_capability = baseSensorCapability;
@@ -82,8 +78,8 @@ switch nationId
         nationParams.nsat = 160;
         nationParams.launch_rate = 10/365.2425*timeStep;
     case 8
-         nationParams.sensors = 10;
-         nationParams.sensor_capability = baseSensorCapability;
+        nationParams.sensors = 10;
+        nationParams.sensor_capability = baseSensorCapability;
         nationParams.tech_cap = [0.8000 0.2000]; % [mean stddev]
         nationParams.gssn_member = true;
         nationParams.fuzz = 1.0; % 1.0 = no fuzz, 0.0 = full fuzz
