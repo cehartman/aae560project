@@ -1,4 +1,4 @@
-function gssa_model = Global_SSN_ABM_MCDriver(numMC,n_nations,minGssnDQ)
+function gssa_model = Global_SSN_ABM_MCDriver(numMC,allNationParams,econParams,minGssnDQ)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Global_SSN_ABM_MCDriver.m
 % AAE 560 - SoS Modeling & Analysis - Project
@@ -11,10 +11,12 @@ function gssa_model = Global_SSN_ABM_MCDriver(numMC,n_nations,minGssnDQ)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fclose all; close all; %clearvars; clc
 
+n_nations = length(allNationParams);
+
 fixRndSeed = false;
 all_gssa_models = cell(numMC,1);
 for iMC = 1:numMC
-    all_gssa_models{iMC} = Global_SSN_ABM(fixRndSeed,n_nations,minGssnDQ);
+    all_gssa_models{iMC} = Global_SSN_ABM(fixRndSeed,allNationParams,econParams,minGssnDQ);
 end
 close all;
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
@@ -36,6 +38,7 @@ nationTotalSatellites = zeros(n_nations,numMC,length(timeVec));
 nationBudget = zeros(n_nations,numMC,length(timeVec));
 nationRevenue = zeros(n_nations,numMC,length(timeVec));
 nationCost = zeros(n_nations,numMC,length(timeVec));
+nationMembership = zeros(n_nations,numMC,length(timeVec));
 gssnTotalMembers = zeros(numMC,length(timeVec));
 for iMC = 1:numMC
     totalDebris(iMC,:) = all_gssa_models{iMC}.leo_environment.data.totalDebris;
@@ -50,6 +53,7 @@ for iMC = 1:numMC
         nationBudget(iNation,iMC,:) = all_gssa_models{iMC}.nations{iNation}.data.budget;
         nationRevenue(iNation,iMC,:) = all_gssa_models{iMC}.nations{iNation}.data.revenue;
         nationCost(iNation,iMC,:) = all_gssa_models{iMC}.nations{iNation}.data.cost;
+        nationMembership(iNation,iMC,:) = double(all_gssa_models{iMC}.nations{iNation}.data.gssnMember);
     end
     gssnTotalMembers(iMC,:) = all_gssa_models{iMC}.gssn.data.total_members_cum;
 end
@@ -70,6 +74,7 @@ for iNation = 1:n_nations
     gssa_model.nations{iNation}.data.budget = mean(squeeze(nationBudget(iNation,:,:)),dim);
     gssa_model.nations{iNation}.data.revenue = mean(squeeze(nationRevenue(iNation,:,:)),dim);
     gssa_model.nations{iNation}.data.cost = mean(squeeze(nationCost(iNation,:,:)),dim);
+    gssa_model.nations{iNation}.data.gssnMembership = squeeze(nationMembership(iNation,:,:));
 end
 gssa_model.gssn.data.total_members_cum = mean(gssnTotalMembers,1);
 

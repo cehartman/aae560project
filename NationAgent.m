@@ -101,6 +101,8 @@ classdef NationAgent
             obj.data.curSatOpCost = zeros(size(timeVec));
             obj.data.curSatOpRev = zeros(size(timeVec));
             obj.data.sensorStatus = repmat({obj.sensor_con_status},size(timeVec));
+            obj.data.gssnMember = false(size(timeVec));
+            obj.data.gssnMember(1) = gm;
             obj.data.gssnMemberStatus = repmat({'non-member'},size(timeVec));
             
             % set GSSN member status
@@ -152,6 +154,7 @@ classdef NationAgent
             obj.data.cost(tIdx) = obj.total_cost;
             obj.data.sensorStatus{tIdx} = obj.sensor_con_status;
             obj.data.gssnMemberStatus{tIdx} = obj.gssn_member_status;
+            obj.data.gssnMember(tIdx) = obj.gssn_member;
             
         end
         
