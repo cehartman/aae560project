@@ -220,7 +220,7 @@ classdef NationAgent
                 obj.total_cost = obj.total_cost + obj.sensor_manu_cost;
                 obj.budget = obj.budget - obj.sensor_manu_cost;
                 obj.n_sensors = obj.n_sensors + 1;
-                obj.sensor_manu_cost = max(obj.sensor_manu_cost - econParams.sensorDiscount,600);
+                obj.sensor_manu_cost = max(obj.sensor_manu_cost - econParams.sensorDiscount,400);
                 
                 % add sensor with a random data quality
                 sdq = normrnd(obj.tech_cap(1),obj.tech_cap(2));
@@ -295,7 +295,7 @@ classdef NationAgent
                 %take the budget, and add or subtract a percentage of the
                 %budget based on standard normal distribution
                 obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0.5,1);
-                obj.sensor_manu_cost = min(obj.sensor_manu_cost+econParams.sensorPenalty,2000)*econParams.inflation;
+                obj.sensor_manu_cost = min(obj.sensor_manu_cost+econParams.sensorPenalty,3200)*econParams.inflation;
                 obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
                 obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;
                 obj.sat_proc_cost = obj.sat_proc_cost*econParams.inflation;
