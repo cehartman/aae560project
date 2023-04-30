@@ -1,3 +1,4 @@
+function [gssa_model, finalCollisions, finalDebris] = Global_SSN_ABM(fixRndSeed, n_nations, minGssnDQ)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Global_SSN_ABM.m
 % AAE 560 - SoS Modeling & Analysis - Project
@@ -8,9 +9,20 @@
 % Surveillance Network (SSN) Agent Based Model (ABM) and evaluates output 
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if nargin < 1
+    fixRndSeed = false;
+end
+if nargin < 2
+    n_nations = 10;
+end
+if nargin < 3
+    minGssnDQ = 0.6;
+end
 % clear;
 close all; clc;
-% rng(3);
+if fixRndSeed
+    rng(3);
+end
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
 
 addpath('Utilities');
@@ -22,8 +34,6 @@ enable_environment_updates = 1;
 environment_updates_only = 0;
 
 % Initialize Adjustable Parameters / Design Variables
-n_nations = 10;
-minGssnDQ = 0.6;
 gssnFeeCoeff = [500 100]; % million $ / year
 wait_times = [1 1 5]; % wait, leave, kick [years]
 
@@ -46,7 +56,6 @@ gssn = GSSNObject(0, minGssnDQ, gssnFeeCoeff, wait_times, timeStep, timeVec);
 gssa_model = gssa_model.add_gssn(gssn);
 
 % Add nation agents
-members = {};
 for iNation = 1:n_nations
     % determine nation-specific properties (some may be fixed for all 
     % nations, others may be set according to random distributions to make 
@@ -78,13 +87,13 @@ end
 gssa_model.gssn = gssa_model.gssn.update(gssa_model.nations,0);
 
 % Start Simulation Steps
-H = waitbar(0/timeVec(end),'Progress:');
+% H = waitbar(0/timeVec(end),'Progress:');
 for t = timeVec(2:end)
     % perform the next model step
     gssa_model = gssa_model.timestep(t,econParams);
     % update waitbar
-    waitbar(t/timeVec(end),H)
+%     waitbar(t/timeVec(end),H)
 end
-waitbar(timeVec(end)/timeVec(end),H,'Simulation Complete!');
+% waitbar(timeVec(end)/timeVec(end),H,'Simulation Complete!');
 
-[finalCollisions, finalDebris] = GlobalSSN_AnalysisPlots(gssa_model,timeVec);
+% [finalCollisions, finalDebris] = GlobalSSN_AnalysisPlots(gssa_model,timeVec);
