@@ -91,6 +91,7 @@ classdef LEOModel
         end
         
         function obj = update_spd(obj)
+            % update spatial debris density
             obj.SPD = obj.numDebris / obj.params.leoVol;
         end
 
@@ -126,8 +127,5 @@ classdef LEOModel
                     | (trackSuccessDraw <= trackingSuccessProb & avoidanceDraw > 0.99));
             end
         end
-        
-        
     end
-    
 end

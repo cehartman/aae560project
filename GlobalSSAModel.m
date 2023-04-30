@@ -30,11 +30,12 @@ classdef GlobalSSAModel
         end
     
         function obj = add_gssn(obj,gssn_agent)
+            % adds the GSSN object to the global model object
             obj.gssn = gssn_agent;
         end
 
         function obj = add_to_gssn(obj, nation,id)
-
+            % adds a nation to the GSSN
             obj.gssn = obj.gssn.add_nation(nation);
             obj.nations{1,id}.gssn_member = true;
             obj.nations{1,id}.gssn_member_status = 'good-standing';
@@ -43,6 +44,7 @@ classdef GlobalSSAModel
         end
 
         function obj = remove_from_gssn(obj, nation,id)
+            % removes a nation from the GSSN
             obj.gssn = obj.gssn.remove_nation(nation);
             obj.nations{1,id}.gssn_member = false;
             obj.nations{1,id}.gssn_member_status = 'non-member';
@@ -51,9 +53,8 @@ classdef GlobalSSAModel
         end
         
         function [obj, decision] = eval_nation(obj, nation)
-
+            % triggers the GSSN to evaluate a nation's eligibility 
             [obj.gssn, decision] = obj.gssn.evaluate(nation);
-
         end
  
         function obj = timestep(obj,t,econParams)
@@ -82,7 +83,7 @@ classdef GlobalSSAModel
                     
                     [obj, decision] = obj.eval_nation(obj.nations{1,i});
                     
-                    if obj.nations{1,i}.want_gssn == 1 && ...
+                    if obj.nations{1,i}.want_gssn && ...
                             ~obj.nations{1,i}.gssn_member && ...
                             decision == 1
                         % if a nation wants to be in the gssn but isn't
@@ -95,7 +96,7 @@ classdef GlobalSSAModel
                             obj.nations{1,i}.gssn_member_status = 'joining';
                         end                       
                         
-                    elseif obj.nations{1,i}.want_gssn == 0 &&...
+                    elseif ~obj.nations{1,i}.want_gssn &&...
                             obj.nations{1,i}.gssn_member
                         % if a nation wants out, let them out
                         if obj.nations{1,i}.gssn_leave_wait >= obj.gssn.leave_wait
@@ -108,7 +109,7 @@ classdef GlobalSSAModel
                         end
                         
                     elseif obj.nations{1,i}.gssn_member && ...
-                            obj.nations{1,i}.want_gssn == 1 &&...
+                            obj.nations{1,i}.want_gssn &&...
                             decision == 0
                         % if a nation wants to be a member, is currently a
                         % member, but the GSSN rejects them, remove them
@@ -121,7 +122,7 @@ classdef GlobalSSAModel
                         end
                         
                     elseif obj.nations{1,i}.gssn_member && ...
-                            obj.nations{1,i}.want_gssn == 1 &&...
+                            obj.nations{1,i}.want_gssn &&...
                             decision == 1
                         % if nation is a member, wants to be, and the GSSN
                         % permits them, the nation remains in good standing
@@ -129,13 +130,13 @@ classdef GlobalSSAModel
                         obj.nations{1,i} = obj.nations{1,i}.reset_gssn_waits();          
 
                     elseif ~obj.nations{1,i}.gssn_member && ...
-                            obj.nations{1,i}.want_gssn == 1 &&...
+                            obj.nations{1,i}.want_gssn &&...
                             decision == 0
                         % if the nation is not a member, wants to join, but
                         % the GSSN will not admit them, take no action
                         
                     elseif ~obj.nations{1,i}.gssn_member && ...
-                            obj.nations{1,i}.want_gssn == 0 
+                            ~obj.nations{1,i}.want_gssn 
                         % if the nation is not a member and does not want
                         % join, take no action
                     else

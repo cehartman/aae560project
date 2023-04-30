@@ -49,10 +49,8 @@ timeEnd  = simTime*365.2425;      % Simulation end time [days]
 timeVec  = 0:timeStep:timeEnd;    % Simulation time steps [days]
 gssa_model = GlobalSSAModel(timeVec,timeStep,envParams);
 
-%Add GSSN object 
-%inputs: nn, dq, cost
+% Add GSSN object 
 gssn = GSSNObject(0, minGssnDQ, gssnFeeCoeff, wait_times, timeStep, timeVec);
-
 gssa_model = gssa_model.add_gssn(gssn);
 
 % Add nation agents
@@ -80,10 +78,9 @@ for iNation = 1:n_nations
     if newNation.gssn_member == true
         gssa_model = gssa_model.add_to_gssn(newNation, iNation);
     end
- 
-
 end
 
+% initial GSSN update
 gssa_model.gssn = gssa_model.gssn.update(gssa_model.nations,0);
 
 % Start Simulation Steps
@@ -96,4 +93,5 @@ for t = timeVec(2:end)
 end
 waitbar(timeVec(end)/timeVec(end),H,'Simulation Complete!');
 
+% generate analysis plots
 % [finalCollisions, finalDebris] = GlobalSSN_AnalysisPlots(gssa_model,timeVec);
