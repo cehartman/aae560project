@@ -23,7 +23,10 @@ end
 
 % Min GSSN Tracking Success Probability vs Min GSSN Data Quality
 figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
-plot(minGssnDQ,minGssnTrackingSuccessProb,'*');
+yline(1.0,'g--','LineWidth',1.5);
+yline(1.2,'b--','LineWidth',1.5);
+plot(minGssnDQ,minGssnTrackingSuccessProb,'k*');
 title('');
 xlabel('Minimum GSSN Required Data Quality','FontWeight','Bold');
 ylabel('Minimum GSSN Tracking Success Probability','Fontweight','Bold');
+legend({'100% Tracking Capacity Performance Requirement','120% Tracking Capacity Design Goal'},'Location','NorthEast');
