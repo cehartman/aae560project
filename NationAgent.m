@@ -43,7 +43,6 @@ classdef NationAgent
         data
         econ_updates
         collision_occurred
-        
     end
     
     methods
@@ -86,7 +85,7 @@ classdef NationAgent
             obj.yearly_budget = gdp;
             obj.satellites = nsat;
             obj.sat_life = sat_life;
-            obj.sat_retire = obj.timeVec(1) + rand(1,obj.satellites)*obj.sat_life; %random sample uniformly between 0 and max sat life
+            obj.sat_retire = obj.timeVec(1) + rand(1,obj.satellites)*obj.sat_life; % random sample uniformly between 0 and max sat life
             obj.launch_rate = lr;
             obj.launch_rate_increase = lri;
             obj.econ_updates = 0;
@@ -114,7 +113,7 @@ classdef NationAgent
         end
         
         function obj = update(obj, t, total_objects, gssn_objects, fee, econParams)
-
+            
             % determine storage array index from current sim time
             tIdx = t/obj.timeStep+1;
             
@@ -126,9 +125,9 @@ classdef NationAgent
             
             % determine if nation would rather join the gssn
             obj = obj.gssn_desire(fee,total_objects);
-
-            % if the agent does not want to be part of the gssn but does 
-            % want to add a sensor, and can afford it, 
+            
+            % if the agent does not want to be part of the gssn but does
+            % want to add a sensor, and can afford it,
             % add (or continue adding) the sensor
             obj = obj.add_sensor(t,econParams);
             
@@ -137,7 +136,7 @@ classdef NationAgent
             
             % update tracking capacity
             obj.tracking_capacity = sum(obj.sensor_tracking_capacity);
-
+            
             % launch and retire satellite(s) (maybe)
             obj = obj.update_satellites(t);
             
@@ -153,7 +152,7 @@ classdef NationAgent
             obj.data.cost(tIdx) = obj.total_cost;
             obj.data.sensorStatus{tIdx} = obj.sensor_con_status;
             obj.data.gssnMemberStatus{tIdx} = obj.gssn_member_status;
-
+            
         end
         
         function obj = sensor_desire(obj, t, total_objects, gssn_objects)
@@ -196,7 +195,7 @@ classdef NationAgent
             % if the agent just requested a sensor
             if (strcmp(obj.sensor_con_status,'na') && obj.wait_con == 0) || ...
                     (strcmp(obj.sensor_con_status,'requested') && (t - obj.last_sensor_request) == 0)
-            % if the agent hasn't been waiting long enough, keep waiting
+                % if the agent hasn't been waiting long enough, keep waiting
             elseif obj.wait_con < obj.sensor_con_speed
                 obj.wait_con = obj.wait_con + 1;
                 obj.sensor_con_status = 'building';
@@ -234,7 +233,7 @@ classdef NationAgent
         
         function obj = gssn_desire(obj, fee, total_objects)
             % nation decides whether to join, leave, or stay in the GSSN
-
+            
             %if an agent doesn't need a sensor, nothing will change here
             %if its current needs are not met, and the agent is not in the
             %gssn already, figure out how much adding a sensor would cost
@@ -243,50 +242,44 @@ classdef NationAgent
             if obj.need_sensor == 1 && ~obj.gssn_member
                 %if nation cannot afford the gssn fee, it cannot join
                 if obj.budget < fee
-                    obj.want_gssn = 0;
+                    obj.want_gssn = false;
                 else
-                %if it is cheaper to mfg a sensor vs joining gssn, and
-                % building a new sensor will give sufficient tracking
-                % capacity, then nation will choose to build its own
+                    %if it is cheaper to mfg a sensor vs joining gssn, and
+                    % building a new sensor will give sufficient tracking
+                    % capacity, then nation will choose to build its own
                     if obj.sensor_manu_cost < fee && (obj.tracking_capacity + obj.sensor_capability*obj.tech_cap(1))/total_objects >= 1.2
-                        obj.want_gssn = 0;
+                        obj.want_gssn = false;
                     else
-                        obj.want_gssn = 1;
+                        obj.want_gssn = true;
                     end
                 end
             elseif obj.need_sensor == 0 && ~obj.gssn_member
                 % if the nation already has sufficient tracking capacity on
                 % its own, it does not need to join the GSSN and pay the
                 % fee
-                obj.want_gssn = 0;
+                obj.want_gssn = false;
             elseif obj.need_sensor == 0 && obj.gssn_member
                 % if the object doesn't need a sensor and is currently a
                 % member, it evaluates if it could still maintain the
                 % desired tracking capacity on its own
                 if obj.tracking_capacity/total_objects >= 1.2 || obj.budget <= fee
-                    obj.want_gssn = 0;
+                    obj.want_gssn = false;
                 else
-                    obj.want_gssn = 1;
+                    obj.want_gssn = true;
                 end
             else
                 % obj needs a sensor and is in the GSSN, so it should stay
-                % in the GSSN until its sensor is built (if it can afford 
+                % in the GSSN until its sensor is built (if it can afford
                 % to), then re-evaluate
                 if obj.budget <= fee
-                    obj.want_gssn = 0;
+                    obj.want_gssn = false;
                 else
-                    obj.want_gssn = 1;
+                    obj.want_gssn = true;
                 end
             end
         end
         
         function obj = update_economic_conditions(obj,t,econParams)
-            % "The SoS model also needs to support the injection of events 
-            % that shape the economic or political conditions under which 
-            % each nation is operating at that time, which affects 
-            % variables like sensor manufacturing and operating costs and 
-            % sensor addition timeline."
-            
             % updates annually, not each timestep
             if mod(t,365.2425) < obj.timeStep
                 obj.econ_updates = obj.econ_updates + 1;
@@ -294,28 +287,28 @@ classdef NationAgent
                 %simulates random fluctuations in the nations budget
                 %take the budget, and add or subtract a percentage of the
                 %budget based on standard normal distribution
-                obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0.5,1); % TODO: decide on budget fluctuation
+                obj.budget = obj.budget + obj.yearly_budget*econParams.inflation*normrnd(0.5,1);
                 obj.sensor_manu_cost = obj.sensor_manu_cost*econParams.inflation;
                 obj.sensor_oper_cost = obj.sensor_oper_cost*econParams.inflation;
                 obj.sat_oper_cost = obj.sat_oper_cost*econParams.inflation;
                 obj.sat_proc_cost = obj.sat_proc_cost*econParams.inflation;
                 obj.sat_revenue = obj.sat_revenue*econParams.inflation;
                 
-                % Degrade DQ of all sensors yearly. One possible mechanism to
-                % incentivise nations to still build sensors even after joining
-                % GSSN.
+                % Can degrade DQ of all sensors yearly. One possible
+                % mechanism to incentivise nations to still build sensors
+                % even after joining GSSN. [currently disabled]
                 obj.sensor_data_quality = obj.sensor_data_quality * 1.00;
             end
         end
         
         function obj = update_costs_and_revenue(obj, tIdx, fee)
-            % costs from sensor operation, satellite operation, revenue from
-            % satellite operations. Manufacturing costs applied elsewhere.
-            
+            % costs from sensor operation, satellite operation, GSSN
+            % membership; revenue from satellite operations. Manufacturing
+            % costs applied elsewhere.
             if obj.gssn_member
                 obj.budget = obj.budget - fee*obj.timeStep/365.2426;
             end
-
+            
             % sensor operation costs
             currentSensOpCost = obj.n_sensors*obj.sensor_oper_cost*obj.timeStep/365.2425;
             obj.total_cost = obj.total_cost + currentSensOpCost;
@@ -338,18 +331,17 @@ classdef NationAgent
         
         function obj = update_satellites(obj,t)
             % launch/de-orbit satellites
-            %TODO: what economic considerations determine when satellites are launched?
-
+            
             % random draw to determine possible launches
             % nations increase launch rate at +0.05 per year
             if mod(t,365.2425) < obj.timeStep
                 obj.launch_rate = obj.launch_rate + obj.launch_rate_increase;
             end
             launchEvents = round(normrnd(obj.launch_rate,0.5));
-            if launchEvents < 0 || randi([0 1]) == 0 % coin toss to prevent launches 50% of the time (may update this)
-               launchEvents = 0; 
+            if launchEvents < 0
+                launchEvents = 0;
             end
-
+            
             % update budget and increase satellite count for each launch
             remainingLaunches = launchEvents;
             while remainingLaunches > 0
@@ -361,7 +353,7 @@ classdef NationAgent
                 end
                 remainingLaunches = remainingLaunches-1;
             end
-
+            
             % retire satellites that have orbited for their lifetime
             retireEventsIdx = t > obj.sat_retire;
             retireEvents = sum(retireEventsIdx);
@@ -370,6 +362,7 @@ classdef NationAgent
         end
         
         function obj = reset_gssn_waits(obj)
+            % reset wait time counters when GSSN membership status changes
             obj.gssn_entry_wait = 0;
             obj.gssn_leave_wait = 0;
             obj.gssn_kick_wait = 0;

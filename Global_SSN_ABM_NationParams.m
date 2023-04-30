@@ -1,4 +1,4 @@
-function [nationParams, econParams] = Global_SSN_ABM_NationParams(timeStep,econParams)
+function [nationParams, econParams] = Global_SSN_ABM_NationParams(timeStep)
 
 econParams.newSatCost = 171;    % million $ from OP
 econParams.satOpCost = 1;       % million $ / year from OP

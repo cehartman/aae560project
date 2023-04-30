@@ -1,6 +1,3 @@
-
-%this class is the GSSN
-
 classdef GSSNObject
     
     properties
@@ -15,14 +12,12 @@ classdef GSSNObject
         entry_wait
         leave_wait
         kick_wait
-        data
-        
+        data  
     end
 
     methods
         function obj = GSSNObject(nn, dq, gssnFeeCoeff, wait_times, timeStep, timeVec)
             % initialize GSSN object
-
             obj.num_nations = nn;
             obj.num_objects = 0; 
             obj.min_data_quality = dq;
@@ -40,7 +35,6 @@ classdef GSSNObject
             obj.data.tracking_capacity = zeros(1,length(timeVec));
             obj.data.combined_sensors = zeros(1,length(timeVec));
             obj.data.fee = zeros(1,length(timeVec));
-
         end
         
         function obj = update(obj,nations,t)
@@ -66,60 +60,40 @@ classdef GSSNObject
         
         
         function [obj, decision] = evaluate(obj,nation)
-            
             %check if nations average data quality is greater than or equal
             %to the minimum data quality required by the GSSN
-
             if nation.nation_data_quality >= obj.min_data_quality
                 decision = 1;
             else
-                decision= 0;
+                decision = 0;
             end
-
         end
         
         function obj = add_nation(obj,nation)
 
-            %look at the data quality of a nation, and compare it to the
-            %input data quality
+            % look at the data quality of a nation, and compare it to the
+            % input data quality
 
-            %increment
+            % increment
             obj.num_nations = obj.num_nations + 1;
 
-            %add nation to the end of the list
+            % add nation to the end of the list
             obj.nations(end+1) = nation.id;
 
+            % increase number of objects tracked by the GSSN
             obj.num_objects = obj.num_objects + nation.tracking_capacity;
-
         end
 
         function obj = remove_nation(obj,nation)
 
-            %delete the nation from the list
+            % delete the nation from the list
             obj.nations(obj.nations == nation.id) = [];
 
-            %reduce number of nations by 1
+            % reduce number of nations by 1
             obj.num_nations = obj.num_nations - 1;
+            
+            % reduce number of objects tracked by the GSSN
             obj.num_objects = obj.num_objects - nation.tracking_capacity;
-            
-            %TODO: update data quality
-
-        end
-
-        
-        function obj = update_dataquality(obj,members)
-
-              
-        %unused, since data quality is fixed for a simulation and 
-            
-
-        end
-
-        function obj = timestep(obj)
-            
-            %possible actions the GSSA could take in a timestep?
-
         end
     end
 end
-
