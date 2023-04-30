@@ -1,4 +1,4 @@
-function gssa_model = Global_SSN_ABM_MCDriver(n_nations,minGssnDQ)
+function gssa_model = Global_SSN_ABM_MCDriver(numMC,n_nations,minGssnDQ)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Global_SSN_ABM_MCDriver.m
 % AAE 560 - SoS Modeling & Analysis - Project
@@ -12,7 +12,6 @@ function gssa_model = Global_SSN_ABM_MCDriver(n_nations,minGssnDQ)
 fclose all; close all; %clearvars; clc
 
 fixRndSeed = false;
-numMC = 1;
 all_gssa_models = cell(numMC,1);
 for iMC = 1:numMC
     all_gssa_models{iMC} = Global_SSN_ABM(fixRndSeed,n_nations,minGssnDQ);
