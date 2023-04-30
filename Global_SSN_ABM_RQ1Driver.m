@@ -9,6 +9,7 @@
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fclose all; close all; clearvars; clc
+% Initialize Parallel Computing
 try
     delete(gcp('nocreate'));
     parpool(8);
