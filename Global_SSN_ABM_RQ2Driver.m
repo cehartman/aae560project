@@ -23,7 +23,7 @@ tic;
 % Initialize Parameters
 numMC = 10;
 n_nations = 10;
-minGssnDQ = 0.6;
+minGssnDQ = 0.7;
 nat1TechCapabilityScale = 0.5:0.5:4.0;
 timeStep = 8; % [days] %NOTE: this is also set independently at a lower level
 
@@ -95,6 +95,7 @@ ypos = maxGssnTrackingSuccessProb - avgGssnTrackingSuccessProb;
 errorbar(nat1TechCapabilityScale,avgGssnTrackingSuccessProb,yneg,ypos,'k.','LineWidth',1.5);
 yline(1.0,'g--','LineWidth',1.5);
 yline(1.2,'b--','LineWidth',1.5);
+ax = gca; ax.YLim(1) = 0;
 title('');
 xlabel('Nation 1 Technological Capability Multiplier','FontWeight','Bold');
 ylabel('Minimum GSSN Tracking Success Probability','Fontweight','Bold');
