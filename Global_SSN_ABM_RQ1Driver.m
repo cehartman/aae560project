@@ -76,7 +76,7 @@ for iDQ = 1:length(minGssnDQ)
 end
 
 % Min GSSN Tracking Success Probability vs Min GSSN Data Quality
-figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
+f1 = figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
 plot(minGssnDQ,avgGssnTrackingSuccessProb,'ko','LineWidth',1.5);
 yneg = avgGssnTrackingSuccessProb - minGssnTrackingSuccessProb;
 ypos = maxGssnTrackingSuccessProb - avgGssnTrackingSuccessProb;
@@ -91,9 +91,11 @@ lgdStr = {'Avg Tracking Success Probability', ...
     '100% Tracking Capacity Performance Requirement', ...
     '120% Tracking Capacity Design Goal'};
 legend(lgdStr,'Location','SouthWest');
+saveas(f1,'Analysis/RQ1/RQ1_GSSNTrackingProbability.fig');
+saveas(f1,'Analysis/RQ1/RQ1_GSSNTrackingProbability.png');
 
 % Avg GSSN Membership vs Min GSSN Data Quality
-figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
+f2 = figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
 plot(minGssnDQ,avgGssnMembership,'ko','LineWidth',1.5);
 yneg = avgGssnMembership - minGssnMembership;
 ypos = maxGssnMembership - avgGssnMembership;
@@ -105,5 +107,7 @@ ylabel('GSSN Membership','Fontweight','Bold');
 lgdStr = {'Avg GSSN Membership', ...
     'Min/Max GSSN Membership'};
 legend(lgdStr,'Location','SouthWest');
+saveas(f2,'Analysis/RQ1/RQ1_GSSNMembership.fig');
+saveas(f2,'Analysis/RQ1/RQ1_GSSNMembership.png');
 
 toc;

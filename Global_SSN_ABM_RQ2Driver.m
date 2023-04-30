@@ -88,7 +88,7 @@ for iTC = 1:length(nat1TechCapabilityScale)
 end
 
 % Min GSSN Tracking Success Probability vs Nation 1 Technological Capability
-figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
+f1 = figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
 plot(nat1TechCapabilityScale,avgGssnTrackingSuccessProb,'ko','LineWidth',1.5);
 yneg = avgGssnTrackingSuccessProb - minGssnTrackingSuccessProb;
 ypos = maxGssnTrackingSuccessProb - avgGssnTrackingSuccessProb;
@@ -103,9 +103,11 @@ lgdStr = {'Avg Tracking Success Probability', ...
     '100% Tracking Capacity Performance Requirement', ...
     '120% Tracking Capacity Design Goal'};
 legend(lgdStr,'Location','SouthWest');
+saveas(f1,['Analysis/RQ2/MinDQ_' strrep(num2str(minGssnDQ),'.','d') '/RQ2_GSSNTrackingProbability.fig']);
+saveas(f1,['Analysis/RQ2/MinDQ_' strrep(num2str(minGssnDQ),'.','d') '/RQ2_GSSNTrackingProbability.png']);
 
 % Avg GSSN Membership vs Nation 1 Technological Capability
-figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
+f2 = figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
 plot(nat1TechCapabilityScale,avgGssnMembership,'ko','LineWidth',1.5);
 yneg = avgGssnMembership - minGssnMembership;
 ypos = maxGssnMembership - avgGssnMembership;
@@ -117,12 +119,14 @@ ylabel('Average GSSN Membership','Fontweight','Bold');
 lgdStr = {'Avg GSSN Membership', ...
     'Min/Max GSSN Membership'};
 legend(lgdStr,'Location','SouthWest');
+saveas(f2,['Analysis/RQ2/MinDQ_' strrep(num2str(minGssnDQ),'.','d') '/RQ2_GSSNMembership.fig']);
+saveas(f2,['Analysis/RQ2/MinDQ_' strrep(num2str(minGssnDQ),'.','d') '/RQ2_GSSNMembership.png']);
 
 % Nation 1 Average GSSN Membership Over Time per Nation 1 Technological Capability                             
 plot_colors = distinguishable_colors(length(nat1TechCapabilityScale),'w');
 timeVec  = 0:timeStep:100*365.2425;    % Simulation time steps [days]
 xData = years(days(timeVec));
-figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
+f3 = figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
 for iTC = 1:length(nat1TechCapabilityScale)
     plot(xData,avgNation1GssnMembership(iTC,:),'LineWidth',2,'Color',plot_colors(iTC,:));
 end
@@ -132,5 +136,7 @@ ylabel('Average Nation 1 GSSN Membership','Fontweight','Bold');
 ax = gca; ax.XLim = round([xData(1) xData(end)]); ax.YLim = [0 1.1];
 lgdStr = strcat({'Technological Capability Multiplier '},strsplit(num2str(nat1TechCapabilityScale)));
 legend(lgdStr,'location','northeastoutside');
+saveas(f3,['Analysis/RQ2/MinDQ_' strrep(num2str(minGssnDQ),'.','d') '/RQ2_GSSNMembershipNation1.fig']);
+saveas(f3,['Analysis/RQ2/MinDQ_' strrep(num2str(minGssnDQ),'.','d') '/RQ2_GSSNMembershipNation1.png']);
 
 toc;
