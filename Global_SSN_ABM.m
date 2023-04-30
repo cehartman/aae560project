@@ -9,7 +9,8 @@
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % clear;
-close all; clc; rng(3);
+close all; clc;
+% rng(3);
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
 
 addpath('Utilities');
