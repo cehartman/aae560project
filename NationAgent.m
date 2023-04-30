@@ -182,7 +182,9 @@ classdef NationAgent
                     obj.need_sensor = 1;
                     obj.last_sensor_request = t;
                     obj.sensor_con_status = 'requested';
-                    fprintf('Year %.4f: Nation %d requested sensor\n',years(days(t)),obj.id);
+                    if ~license('test','distrib_computing_toolbox')
+                        fprintf('Year %.4f: Nation %d requested sensor\n',years(days(t)),obj.id);
+                    end
                 else
                     obj.need_sensor = 0;
                 end
@@ -230,7 +232,9 @@ classdef NationAgent
                 obj.wait_con = 0;
                 obj.sensor_con_status = 'na';
                 
-                fprintf('Year %.4f: Nation %d added sensor\n',years(days(t)),obj.id);
+                if ~license('test','distrib_computing_toolbox')
+                    fprintf('Year %.4f: Nation %d added sensor\n',years(days(t)),obj.id);
+                end
             end
         end
         

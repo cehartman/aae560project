@@ -9,20 +9,21 @@ function gssa_model = Global_SSN_ABM_MCDriver(numMC,allNationParams,econParams,m
 % Surveillance Network (SSN) Agent Based Model (ABM) and evaluates output
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fclose all; close all; %clearvars; clc
-
+if nargin < 3
+    minGssnDQ = 0.0;
+end
 n_nations = length(allNationParams);
 
 fixRndSeed = false;
-all_gssa_models = cell(numMC,1);
-for iMC = 1:numMC
-    all_gssa_models{iMC} = Global_SSN_ABM(fixRndSeed,allNationParams,econParams,minGssnDQ);
+all_gssa_models = cell(1,numMC);
+parfor iMC = 1:numMC
+    fprintf('\tProcessing MC %d\n',iMC);
+    all_gssa_models{1,iMC} = Global_SSN_ABM(fixRndSeed,allNationParams,econParams,minGssnDQ);
 end
 close all;
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
 
-timeVec = all_gssa_models{iMC}.leo_environment.timeVec;
-% n_nations = all_gssa_models{iMC}.n_nations;
+timeVec = all_gssa_models{1}.leo_environment.timeVec;
 
 % Re-create data structures
 % (excludes sensor status and GSSN membership status plots)
@@ -62,11 +63,11 @@ gssa_model.gssn.data.tracking_capacity = mean(gssnTrackingCapacity,1);
 gssa_model.leo_environment.data.totalCollisions = mean(totalCollisions,1);
 gssa_model.gssn.data.combined_sensors = mean(gssnCombinedSensors,1);
 gssa_model.leo_environment.data.leoSats = mean(leoSats,1);
-if n_nations == 1
+% if n_nations == 1
     dim = 1;
-else
-    dim = 2;
-end
+% else
+%     dim = 2;
+% end
 for iNation = 1:n_nations
     gssa_model.nations{iNation}.data.trackingCapacity = mean(squeeze(nationTrackingCapacity(iNation,:,:)),dim);
     gssa_model.nations{iNation}.data.totalSensors = mean(squeeze(nationTotalSensors(iNation,:,:)),dim);
