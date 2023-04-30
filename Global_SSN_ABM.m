@@ -87,13 +87,13 @@ end
 gssa_model.gssn = gssa_model.gssn.update(gssa_model.nations,0);
 
 % Start Simulation Steps
-% H = waitbar(0/timeVec(end),'Progress:');
+H = waitbar(0/timeVec(end),'Progress:');
 for t = timeVec(2:end)
     % perform the next model step
     gssa_model = gssa_model.timestep(t,econParams);
     % update waitbar
-%     waitbar(t/timeVec(end),H)
+    waitbar(t/timeVec(end),H)
 end
-% waitbar(timeVec(end)/timeVec(end),H,'Simulation Complete!');
+waitbar(timeVec(end)/timeVec(end),H,'Simulation Complete!');
 
 % [finalCollisions, finalDebris] = GlobalSSN_AnalysisPlots(gssa_model,timeVec);
