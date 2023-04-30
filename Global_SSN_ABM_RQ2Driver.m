@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Global_SSN_ABM_RQ1Driver.m
+% Global_SSN_ABM_RQ2Driver.m
 % AAE 560 - SoS Modeling & Analysis - Project
 % Authors: Logan Greer, Charlie Hartman, Joe Mandara
 % Creation Date: 4/15/2023
@@ -13,13 +13,14 @@ fclose all; close all; clearvars; clc; rng('default');
 % test parameters
 numMC = 1;
 n_nations = 10;
-minGssnDQ = 0:0.2:1.0;
+minGssnDQ = 0.6;
+nat1SensorCapability = 200:200:1000;
 timeStep = 8; % [days] %NOTE: this is also set independently at a lower level
 
 % initialize data storage
-minGssnTrackingSuccessProb = zeros(size(minGssnDQ));
-avgGssnMembership = zeros(size(minGssnDQ));
-all_gssa_models = cell(length(minGssnDQ),1);
+minGssnTrackingSuccessProb = zeros(size(nat1SensorCapability));
+avgGssnMembership = zeros(size(nat1SensorCapability));
+all_gssa_models = cell(length(nat1SensorCapability),1);
 allNationParams(n_nations) = struct();
 
 % Econ params are always the same for each nation
@@ -32,37 +33,41 @@ econParams.inflation = 1.0; % negate inflation; not relevant to RQs
 econParams.sensorDiscount = 0;
 econParams.sensorPenalty = 0;
 
-% set fixed nation parameters
+% set fixed nation parameters (nation 1's SC changed later)
 allNationParams(n_nations) = struct();
 for iNat = 1:n_nations
     allNationParams(iNat).nationParams = Global_SSN_ABM_NationParams_Static(econParams,timeStep,iNat);
 end
 
-% iterate over minimun GSSN data quality design variable
-for iDQ = 1:length(minGssnDQ)
+% iterate over nation 1 sensor capability DV
+for iSC = 1:length(nat1SensorCapability)
+    
+    % update nation 1's sensor capability for the current DV iteration
+    allNationParams(1).nationParams.sensor_capability = nat1SensorCapability(iSC);
+    
     % run MC simulation for current DV setting
-    gssa_model = Global_SSN_ABM_MCDriver(numMC,allNationParams,econParams,minGssnDQ(iDQ));
+    gssa_model = Global_SSN_ABM_MCDriver(numMC,allNationParams,econParams,minGssnDQ);
     gssnTrackingSuccessProb = gssa_model.gssn.data.tracking_capacity ./ gssa_model.leo_environment.data.totalDebris;
-    minGssnTrackingSuccessProb(iDQ) = min(gssnTrackingSuccessProb);
-    avgGssnMembership(iDQ) = mean(gssa_model.gssn.data.total_members_cum);
+    minGssnTrackingSuccessProb(iSC) = min(gssnTrackingSuccessProb);
+    avgGssnMembership(iSC) = mean(gssa_model.gssn.data.total_members_cum);
     
     % store gssa_model
-    all_gssa_models{iDQ} = gssa_model;
+    all_gssa_models{iSC} = gssa_model;
 end
 
-% Min GSSN Tracking Success Probability vs Min GSSN Data Quality
+% Min GSSN Tracking Success Probability vs Nation 1 Sensor Capability
 figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
 yline(1.0,'g--','LineWidth',1.5);
 yline(1.2,'b--','LineWidth',1.5);
-plot(minGssnDQ,minGssnTrackingSuccessProb,'k*');
+plot(nat1SensorCapability,minGssnTrackingSuccessProb,'k*');
 title('');
-xlabel('Minimum GSSN Required Data Quality','FontWeight','Bold');
+xlabel('Nation 1 Sensor Capability','FontWeight','Bold');
 ylabel('Minimum GSSN Tracking Success Probability','Fontweight','Bold');
 legend({'100% Tracking Capacity Performance Requirement','120% Tracking Capacity Design Goal'},'Location','NorthEast');
 
-% Avg GSSN Membership vs Min GSSN Data Quality
+% Avg GSSN Membership vs Nation 1 Sensor Capability
 figure('Position',[600 400 720 420],'Color','w'); hold on; box on; grid on;
-plot(minGssnDQ,avgGssnMembership,'k*');
+plot(nat1SensorCapability,avgGssnMembership,'k*');
 title('');
-xlabel('Minimum GSSN Required Data Quality','FontWeight','Bold');
+xlabel('Nation 1 Sensor Capability','FontWeight','Bold');
 ylabel('Average GSSN Membership','Fontweight','Bold');
