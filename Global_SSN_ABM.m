@@ -8,7 +8,9 @@
 % Surveillance Network (SSN) Agent Based Model (ABM) and evaluates output 
 % performance metrics.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear; close all; clc; rng(3);
+% clear;
+close all; clc;
+% rng(3);
 F = findall(0,'type','figure','tag','TMWWaitbar'); delete(F);
 
 addpath('Utilities');
