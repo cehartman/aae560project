@@ -98,6 +98,7 @@ plot(minGssnDQ,avgGssnMembership,'ko','LineWidth',1.5);
 yneg = avgGssnMembership - minGssnMembership;
 ypos = maxGssnMembership - avgGssnMembership;
 errorbar(minGssnDQ,avgGssnMembership,yneg,ypos,'k.','LineWidth',1.5);
+ax = gca; ax.YLim = [0 10];
 title('');
 xlabel('Minimum GSSN Required Data Quality','FontWeight','Bold');
 ylabel('GSSN Membership','Fontweight','Bold');
